@@ -33,7 +33,7 @@ pak::pak("BristolMyersSquibb/blockr.md")
 
 This is a basic example which shows you how to solve a common problem:
 
-```{r example}
+``` r
 library(blockr.md)
-blockr.core::serve(new_md_board())
+blockr.core::serve(new_md_board(document = c("## Title", "Some paragraph.")))
 ```

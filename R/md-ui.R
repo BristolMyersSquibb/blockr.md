@@ -5,11 +5,25 @@ doc_ui <- function(id, x) {
 
   id <- NS(id, "doc")
 
-  shinyAce::aceEditor(
-    NS(id, "ace"),
-    board_doc(x),
-    mode = "markdown"
+  bslib::card(
+    bslib::card_header(
+      "Document builder",
+      actionButton(
+        NS(id, "render"),
+        bsicons::bs_icon("box-arrow-up"),
+        class = c("border-0", "p-0")
+      ),
+      class = "d-flex justify-content-between"
+    ),
+    bslib::card_body(
+      shinyAce::aceEditor(
+        NS(id, "ace"),
+        board_doc(x),
+        mode = "markdown"
+      )
+    )
   )
+
 }
 
 #' @export
