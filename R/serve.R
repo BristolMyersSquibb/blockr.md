@@ -44,7 +44,11 @@ document_server <- function(board, update, ...) {
           req(input$ace)
 
           preview(
-            render_doc(input$ace, tempfile(tmpdir = temp_dir))
+            render_doc(
+              input$ace,
+              lst_xtr(board$blocks, "server", "result"),
+              temp_dir
+            )
           )
 
           showModal(
@@ -79,15 +83,6 @@ document_server <- function(board, update, ...) {
   )
 }
 
-render_doc <- function(doc, file = tempfile()) {
-
-  tmp <- tempfile()
-  on.exit(unlink(tmp))
-  writeLines(doc, tmp)
-
-  rmarkdown::render(
-    tmp,
-    output_format = "pdf_document",
-    output_file = file
-  )
+render_doc <- function(doc, blocks, dir) {
+  apply_block_filter(doc, blocks, tempfile(tmpdir = dir, fileext = ".pdf"))
 }

@@ -12,4 +12,9 @@ RoxygenNote: 7.3.2
 Imports:
     blockr.core (>= 0.1.1),
     shiny,
-    shinyAce
+    shinyAce,
+    bsicons,
+    bslib,
+    jsonlite,
+    knitr,
+    rmarkdown
