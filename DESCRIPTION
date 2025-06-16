@@ -16,4 +16,10 @@ Imports:
     bslib,
     jsonlite,
     knitr,
-    rmarkdown
+    rmarkdown,
+    gt,
+    htmltools,
+    webshot2,
+    magick
+Suggests:
+    pdftools

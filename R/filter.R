@@ -7,8 +7,6 @@ apply_block_filter <- function(doc, blocks,
 
   on.exit(unlink(dir, recursive = TRUE))
 
-  knitr::opts_knit$set(base.dir = dir)
-
   res <- filter_md(
     block_filter,
     blocks = blocks,
@@ -36,27 +34,10 @@ block_filter <- function(key, value, blocks, temp_dir) {
 
     stopifnot(id %in% names(blocks))
 
-    opts <- list(
-      label = "abc",
-      fig.width = 6.5,
-      fig.height = 4.5,
-      dev = "pdf",
-      fig.ext = "pdf",
-      dpi = 72,
-      fig.show = TRUE
-    )
-
-    path <- knitr::sew(blocks[[id]](), opts)
-
-    res <- md_image(
-      target = paste0("file://", file.path(temp_dir, path)),
-      text = md_str(value[[2L]][[1L]][["c"]]),
-      caption = value[[3L]][[2L]],
-      attr = md_attr(
-        identifier = value[[1L]][[1L]],
-        classes = as.character(value[[1L]][[2L]]),
-        key_val_pairs = value[[1L]][[3L]]
-      )
+    md_render(
+      blocks[[id]](),
+      value,
+      temp_dir
     )
   }
 }
