@@ -35,54 +35,81 @@ document_server <- function(board, update, ...) {
         )
       )
 
-      preview <- reactiveVal()
+      ast <- tempfile(fileext = ".json")
+      pdf <- tempfile(tmpdir = temp_dir, fileext = ".pdf")
+      tmp <- tempfile()
 
       observeEvent(
         input$render,
         {
-
           req(input$ace)
 
-          preview(
-            render_doc(
-              input$ace,
-              lst_xtr(board$blocks, "server", "result"),
-              temp_dir
-            )
+          dir.create(tmp)
+
+          filter_md(
+            block_filter,
+            blocks = lst_xtr(board$blocks, "server", "result"),
+            temp_dir = normalizePath(tmp),
+            doc = input$ace,
+            output = ast
+          )
+
+          rmarkdown::pandoc_convert(
+            input = ast,
+            from = "json",
+            to = "pdf",
+            output = pdf
           )
 
           showModal(
             modalDialog(
               title = "PDF preview",
               tags$embed(
-                src = paste0("doc_previews/", basename(preview())),
+                src = paste0("doc_previews/", basename(pdf)),
                 type = "application/pdf",
                 width = "100%",
                 height = "500px"
               ),
               size = "xl",
-              footer = actionButton(
-                session$ns("close_modal"),
-                label = "Close"
+              footer = tagList(
+                downloadButton(
+                  session$ns("dl_ppt"),
+                  label = "Download PPT",
+                  class = "btn-success"
+                ),
+                actionButton(
+                  session$ns("close_modal"),
+                  label = "Close",
+                  class = "btn-danger"
+                )
               )
             )
           )
         }
       )
 
+      output$dl_ppt <- downloadHandler(
+        function() paste0(
+          "topline_",
+          format(Sys.time(), "%Y-%m-%d_%H-%M-%S"),
+          ".pptx"
+        ),
+        function(file) rmarkdown::pandoc_convert(
+          input = ast,
+          from = "json",
+          to = "pptx",
+          output = file
+        )
+      )
+
       observeEvent(
         input$close_modal,
         {
-          req(preview())
+          unlink(c(ast, pdf))
+          unlink(tmp, recursive = TRUE)
           removeModal()
-          unlink(preview())
-          preview(NULL)
         }
       )
     }
   )
-}
-
-render_doc <- function(doc, blocks, dir) {
-  apply_block_filter(doc, blocks, tempfile(tmpdir = dir, fileext = ".pdf"))
 }

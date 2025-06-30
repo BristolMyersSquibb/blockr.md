@@ -1,31 +1,3 @@
-apply_block_filter <- function(doc, blocks,
-                               output = tempfile(fileext = ".pdf")) {
-
-  dir <- tempfile()
-
-  dir.create(dir)
-
-  on.exit(unlink(dir, recursive = TRUE))
-
-  res <- filter_md(
-    block_filter,
-    blocks = blocks,
-    temp_dir = normalizePath(dir),
-    doc = doc
-  )
-
-  on.exit(unlink(res), add = TRUE)
-
-  rmarkdown::pandoc_convert(
-    input = res,
-    from = "json",
-    to = "pdf",
-    output = output
-  )
-
-  invisible(output)
-}
-
 block_filter <- function(key, value, blocks, temp_dir) {
 
   if (key == "Image" && grepl("^blockr://", value[[3L]][[1L]])) {
@@ -193,7 +165,13 @@ as.md_loio.character <- function(x) {
 #' @noRd
 #' @export
 as.md_loio.list <- function(x) {
-    structure(lapply(x, as.md_inline), class = c("md_loio", "list"))
+  structure(lapply(x, as.md_inline), class = c("md_loio", "list"))
+}
+
+#' @noRd
+#' @export
+as.md_loio.list <- function(x) {
+  structure(x, class = c("md_loio", "list"))
 }
 
 as.md_inline <- function(x) {

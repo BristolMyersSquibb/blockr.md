@@ -8,7 +8,7 @@ md_render <- function(x, value, dir = tempdir(), ...) {
 
 #' @rdname new_md_board
 #' @export
-md_render.default <- function(x, value, dir = tempdir(), ...) {
+md_render.file <- function(x, value, dir = tempdir(), ...) {
 
   stopifnot(is.character(x), length(x) == 1L, ...length() == 0L)
 
@@ -18,7 +18,7 @@ md_render.default <- function(x, value, dir = tempdir(), ...) {
 
   md_image(
     target = paste0("file://", normalizePath(x)),
-    text = md_str(value[[2L]][[1L]][["c"]]),
+    text = value[[2L]],
     caption = value[[3L]][[2L]],
     attr = md_attr(
       identifier = value[[1L]][[1L]],
@@ -26,6 +26,12 @@ md_render.default <- function(x, value, dir = tempdir(), ...) {
       key_val_pairs = value[[1L]][[3L]]
     )
   )
+}
+
+#' @rdname new_md_board
+#' @export
+md_render.ggplot <- function(x, value, dir = tempdir(), ...) {
+  md_render(evaluate::evaluate("x"), value, dir, ...)
 }
 
 #' @rdname new_md_board
@@ -40,11 +46,12 @@ md_render.recordedplot <- function(x, value, dir = tempdir(), ...) {
     fig.ext = "pdf",
     dpi = 72,
     fig.show = TRUE,
-    fig.path = dir
+    fig.path = paste0(dir, "/")
   )
 
+  res <- knitr::sew(x, opts)
 
-  md_render(knitr::sew(x, opts), value, dir, ...)
+  md_render(new_file(res, dir), value, dir, ...)
 }
 
 #' @rdname new_md_board
@@ -85,5 +92,5 @@ md_render.gt_tbl <- function(x, value, dir = tempdir(), ...) {
 
   magick::image_write(crp, res, format = "pdf")
 
-  md_render(basename(res), value, dir, ...)
+  md_render(new_file(res, dir), value, dir, ...)
 }

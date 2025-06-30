@@ -6,7 +6,8 @@
 \alias{board_doc}
 \alias{board_doc<-}
 \alias{md_render}
-\alias{md_render.default}
+\alias{md_render.file}
+\alias{md_render.ggplot}
 \alias{md_render.recordedplot}
 \alias{md_render.evaluate_evaluation}
 \alias{md_render.data.frame}
@@ -24,7 +25,9 @@ board_doc(x) <- value
 
 md_render(x, value, dir = tempdir(), ...)
 
-\method{md_render}{default}(x, value, dir = tempdir(), ...)
+\method{md_render}{file}(x, value, dir = tempdir(), ...)
+
+\method{md_render}{ggplot}(x, value, dir = tempdir(), ...)
 
 \method{md_render}{recordedplot}(x, value, dir = tempdir(), ...)
 
