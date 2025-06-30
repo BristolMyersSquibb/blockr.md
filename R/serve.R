@@ -10,33 +10,16 @@ document_server <- function(board, update, ...) {
     "doc",
     function(input, output, session) {
 
-      temp_dir <- tempfile()
-
-      if (!dir.exists(temp_dir)) {
-        dir.create(temp_dir)
-        onStop(function() unlink(temp_dir, recursive = TRUE))
-      }
-
-      addResourcePath(
-        prefix = "doc_previews",
-        directoryPath = temp_dir
-      )
-
       observeEvent(
         get_board_option_or_default("dark_mode"),
         shinyAce::updateAceEditor(
           session,
           "ace",
-          theme = switch(
-            get_board_option_or_default("dark_mode"),
-            light = "katzenmilch",
-            dark = "dracula"
-          )
+          theme = ace_theme()
         )
       )
 
       ast <- tempfile(fileext = ".json")
-      pdf <- tempfile(tmpdir = temp_dir, fileext = ".pdf")
       tmp <- tempfile()
 
       observeEvent(
@@ -54,23 +37,27 @@ document_server <- function(board, update, ...) {
             output = ast
           )
 
+          md <- tempfile()
+          on.exit(unlink(md))
+
           rmarkdown::pandoc_convert(
             input = ast,
             from = "json",
-            to = "pdf",
-            output = pdf
+            to = "markdown",
+            output = md
           )
 
           showModal(
             modalDialog(
-              title = "PDF preview",
-              tags$embed(
-                src = paste0("doc_previews/", basename(pdf)),
-                type = "application/pdf",
-                width = "100%",
-                height = "500px"
+              title = "MD preview",
+              shinyAce::aceEditor(
+                "preview",
+                readLines(md),
+                mode = "markdown",
+                theme = ace_theme(),
+                readOnly = TRUE
               ),
-              size = "xl",
+              size = "l",
               footer = tagList(
                 downloadButton(
                   session$ns("dl_ppt"),
@@ -105,7 +92,7 @@ document_server <- function(board, update, ...) {
       observeEvent(
         input$close_modal,
         {
-          unlink(c(ast, pdf))
+          unlink(ast)
           unlink(tmp, recursive = TRUE)
           removeModal()
         }

@@ -1,17 +1,50 @@
 block_filter <- function(key, value, blocks, temp_dir) {
 
-  if (key == "Image" && grepl("^blockr://", value[[3L]][[1L]])) {
+  if (key == "Figure") {
 
-    id <- sub("^blockr://", "", value[[3L]][[1L]])
+    val <- value[[3L]][[1L]][["c"]][[1L]]
 
-    stopifnot(id %in% names(blocks))
+    if (setequal(c("c", "t"), names(val)) && identical(val[["t"]], "Image")) {
 
-    md_render(
-      blocks[[id]](),
-      value,
-      temp_dir
-    )
+      uri <- val[["c"]][[3L]][[1L]]
+
+      if (is.character(uri) && length(uri) == 1L && grepl("^blockr://", uri)) {
+
+        id <- sub("^blockr://", "", uri)
+
+        stopifnot(id %in% names(blocks))
+
+        res <- md_render(
+          blocks[[id]](),
+          val[["c"]],
+          temp_dir
+        )
+
+        if (inherits(res, "md_raw")) {
+          return(res)
+        }
+
+        stopifnot(inherits(res, "md_inline"))
+
+        value[[3L]][[1L]][["c"]][[1L]] <- res
+
+        res <- md_figure(
+          value[[3L]],
+          value[[2L]],
+          value[[1L]]
+        )
+
+        return(res)
+      }
+
+      log_debug("skipping non blockr figure replacement")
+
+    } else {
+      log_info("skipping figure replacement (unexpected structure)")
+    }
   }
+
+  NULL
 }
 
 filter_md <- function(fun, ..., doc, output = tempfile(fileext = ".json")) {
@@ -96,100 +129,4 @@ astrapply <- function(x, fun, ...) {
   }
 
   lapply(x, astrapply, fun, ...)
-}
-
-md_image <- function(target, text, caption = "", attr = md_attr()) {
-
-  if (rmarkdown::pandoc_version() < "1.16") {
-
-    res <- list(
-      t = "Image",
-      c = list(as.md_loio(text), list(target, caption))
-    )
-
-  } else {
-
-    res <- list(
-      t = "Image",
-      c = list(attr, as.md_loio(text), list(target, caption))
-    )
-  }
-
-  structure(res, class = c("md_inline", "list"))
-}
-
-md_attr <- function(identifier = "", classes = character(),
-                    key_val_pairs = list()) {
-
-  stopifnot(is.character(classes))
-
-  structure(
-    list(identifier, as.list(classes), key_val_pairs),
-    class = c("md_attr", "list")
-  )
-}
-
-md_str <- function(x) {
-  structure(
-    list(t = "Str", c = x),
-    class = c("md_inline", "list")
-  )
-}
-
-as.md_loio <- function(x) {
-  UseMethod("as.md_loio")
-}
-
-#' @noRd
-#' @export
-as.md_loio.md_loio <- identity
-
-#' @noRd
-#' @export
-as.md_loio.NULL <- function(x) {
-  structure(list(), class = c("md_loio", "list"))
-}
-
-#' @noRd
-#' @export
-as.md_loio.md_inline <- function(x) {
-  structure(list(x), class = c("md_loio", "list"))
-}
-
-#' @noRd
-#' @export
-as.md_loio.character <- function(x) {
-  structure(list(as.md_inline(x)), class = c("md_loio", "list"))
-}
-
-#' @noRd
-#' @export
-as.md_loio.list <- function(x) {
-  structure(lapply(x, as.md_inline), class = c("md_loio", "list"))
-}
-
-#' @noRd
-#' @export
-as.md_loio.list <- function(x) {
-  structure(x, class = c("md_loio", "list"))
-}
-
-as.md_inline <- function(x) {
-  UseMethod("as.md_inline")
-}
-
-#' @noRd
-#' @export
-as.md_inline.md_inline <- identity
-
-#' @noRd
-#' @export
-as.md_inline.character <- function(x) {
-  md_str(paste(x, collapse = " "))
-}
-
-#' @noRd
-#' @export
-as.md_inline.NULL <- function(x) {
-  structure(list(), class = c("md_inline", "list"))
 }

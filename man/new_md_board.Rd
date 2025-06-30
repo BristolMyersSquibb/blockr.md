@@ -12,6 +12,7 @@
 \alias{md_render.evaluate_evaluation}
 \alias{md_render.data.frame}
 \alias{md_render.gt_tbl}
+\alias{md_render.flextable}
 \alias{doc_ui}
 \title{Markdown board}
 \usage{
@@ -27,15 +28,17 @@ md_render(x, value, dir = tempdir(), ...)
 
 \method{md_render}{file}(x, value, dir = tempdir(), ...)
 
-\method{md_render}{ggplot}(x, value, dir = tempdir(), ...)
+\method{md_render}{ggplot}(x, ...)
 
 \method{md_render}{recordedplot}(x, value, dir = tempdir(), ...)
 
-\method{md_render}{evaluate_evaluation}(x, value, dir = tempdir(), ...)
+\method{md_render}{evaluate_evaluation}(x, ...)
 
-\method{md_render}{data.frame}(x, value, dir = tempdir(), ...)
+\method{md_render}{data.frame}(x, ...)
 
 \method{md_render}{gt_tbl}(x, value, dir = tempdir(), ...)
+
+\method{md_render}{flextable}(x, ...)
 
 doc_ui(id, x)
 }

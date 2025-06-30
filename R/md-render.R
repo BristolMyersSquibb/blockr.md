@@ -30,8 +30,8 @@ md_render.file <- function(x, value, dir = tempdir(), ...) {
 
 #' @rdname new_md_board
 #' @export
-md_render.ggplot <- function(x, value, dir = tempdir(), ...) {
-  md_render(evaluate::evaluate("x"), value, dir, ...)
+md_render.ggplot <- function(x, ...) {
+  md_render(evaluate::evaluate("x"), ...)
 }
 
 #' @rdname new_md_board
@@ -56,20 +56,20 @@ md_render.recordedplot <- function(x, value, dir = tempdir(), ...) {
 
 #' @rdname new_md_board
 #' @export
-md_render.evaluate_evaluation <- function(x, value, dir = tempdir(), ...) {
+md_render.evaluate_evaluation <- function(x, ...) {
 
   hit <- lgl_ply(x, inherits, "recordedplot")
 
   stopifnot(sum(hit) == 1L)
 
-  md_render(x[[which(hit)]], value, dir, ...)
+  md_render(x[[which(hit)]], ...)
 }
 
 #' @method md_render data.frame
 #' @rdname new_md_board
 #' @export
-md_render.data.frame <- function(x, value, dir = tempdir(), ...) {
-  md_render(gt::gt(utils::head(x)), value, dir, ...)
+md_render.data.frame <- function(x, ...) {
+  md_render(flextable::flextable(utils::head(x)), ...)
 }
 
 #' @rdname new_md_board
@@ -93,4 +93,21 @@ md_render.gt_tbl <- function(x, value, dir = tempdir(), ...) {
   magick::image_write(crp, res, format = "pdf")
 
   md_render(new_file(res, dir), value, dir, ...)
+}
+
+#' @rdname new_md_board
+#' @export
+md_render.flextable <- function(x, ...) {
+
+  md_raw(
+    "openxml",
+    flextable:::gen_raw_pml(
+      x,
+      uid = as.integer(runif(n = 1) * 10^9),
+      offx = 1,
+      offy = 2,
+      cx = 10,
+      cy = 6
+    )
+  )
 }

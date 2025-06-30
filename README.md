@@ -39,12 +39,13 @@ serve(
     document = c(
       "# My title",
       "",
-      "Some sentence to introduce in a first paragraph to introduce the topic",
-      "of my document.",
+      "## Slide with table",
       "",
-      "![block](blockr://b)",
+      "![](blockr://a)",
       "",
-      "And another sentence in a final paragraph to end my document."
+      "## Slide with plot",
+      "",
+      "![Sepal length vs width for iris species](blockr://b)"
     )
   )
 )
