@@ -1,50 +1,69 @@
 block_filter <- function(key, value, blocks, temp_dir) {
 
-  if (key == "Figure") {
+  if (key == "Para" && length(value) == 1L && has_ct(value[[1L]])) {
+
+    res <- block_filter(value[[1L]][["t"]], value[[1L]][["c"]], blocks,
+                        temp_dir)
+
+    if (inherits(res, "md_raw")) {
+      return(res)
+    }
+
+  } else if (key == "Figure") {
 
     val <- value[[3L]][[1L]][["c"]][[1L]]
 
-    if (setequal(c("c", "t"), names(val)) && identical(val[["t"]], "Image")) {
+    if (has_ct(val)) {
 
-      uri <- val[["c"]][[3L]][[1L]]
+      res <- block_filter(val[["t"]], val[["c"]], blocks, temp_dir)
 
-      if (is.character(uri) && length(uri) == 1L && grepl("^blockr://", uri)) {
-
-        id <- sub("^blockr://", "", uri)
-
-        stopifnot(id %in% names(blocks))
-
-        res <- md_render(
-          blocks[[id]](),
-          val[["c"]],
-          temp_dir
-        )
-
-        if (inherits(res, "md_raw")) {
-          return(res)
-        }
-
-        stopifnot(inherits(res, "md_inline"))
-
-        value[[3L]][[1L]][["c"]][[1L]] <- res
-
-        res <- md_figure(
-          value[[3L]],
-          value[[2L]],
-          value[[1L]]
-        )
-
+      if (inherits(res, "md_raw")) {
         return(res)
       }
 
-      log_debug("skipping non blockr figure replacement")
+      stopifnot(inherits(res, "md_inline"))
+
+      value[[3L]][[1L]][["c"]][[1L]] <- res
+
+      res <- md_figure(
+        value[[3L]],
+        value[[2L]],
+        value[[1L]]
+      )
+
+      return(res)
 
     } else {
       log_info("skipping figure replacement (unexpected structure)")
     }
+
+  } else if (key == "Image") {
+
+    uri <- value[[3L]][[1L]]
+
+    if (is.character(uri) && length(uri) == 1L && grepl("^blockr://", uri)) {
+
+      id <- sub("^blockr://", "", uri)
+
+      stopifnot(id %in% names(blocks))
+
+      res <- md_render(
+        blocks[[id]](),
+        value,
+        temp_dir
+      )
+
+      return(res)
+    }
+
+    log_debug("skipping non blockr figure replacement")
   }
 
   NULL
+}
+
+has_ct <- function(x) {
+  setequal(c("c", "t"), names(x))
 }
 
 filter_md <- function(fun, ..., doc, output = tempfile(fileext = ".json")) {
