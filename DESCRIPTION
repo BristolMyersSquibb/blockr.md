@@ -1,9 +1,13 @@
 Package: blockr.md
-Title: What the Package Does (One Line, Title Case)
-Version: 0.0.0.9000
+Title: Markdown builder for blockr
+Version: 0.0.1
 Authors@R: 
-    person("First", "Last", , "first.last@example.com", role = c("aut", "cre"))
-Description: What the package does (one paragraph).
+    c(person(given = "Nicolas",
+             family = "Bennett",
+             role = c("aut", "cre"),
+             email = "nicolas@cynkra.com")
+    )
+Description: Provides a blockr.ui compatible markdown module.
 License: GPL (>= 3)
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
@@ -22,6 +26,8 @@ Imports:
     webshot2,
     magick,
     evaluate,
-    blockr.ui
+    blockr.ui (>= 1.0.1)
 Suggests:
     pdftools
+Remotes:
+    BristolMyersSquibb/blockr.ui#78

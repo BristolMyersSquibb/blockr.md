@@ -4,12 +4,12 @@
 \name{blockr.md-package}
 \alias{blockr.md}
 \alias{blockr.md-package}
-\title{blockr.md: What the Package Does (One Line, Title Case)}
+\title{blockr.md: Markdown builder for blockr}
 \description{
-What the package does (one paragraph).
+Provides a blockr.ui compatible markdown module.
 }
 \author{
-\strong{Maintainer}: First Last \email{first.last@example.com}
+\strong{Maintainer}: Nicolas Bennett \email{nicolas@cynkra.com}
 
 }
 \keyword{internal}
