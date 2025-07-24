@@ -21,6 +21,7 @@ Imports:
     htmltools,
     webshot2,
     magick,
-    evaluate
+    evaluate,
+    blockr.ui
 Suggests:
     pdftools

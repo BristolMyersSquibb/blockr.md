@@ -1,11 +1,7 @@
+#' @param update,session,parent See [blockr.ui::main_server()]
+#' @rdname new_md_board
 #' @export
-serve.md_board <- function(x, id = rand_names(),
-													 plugins = board_plugins(), ...) {
-
-	NextMethod(callbacks = list(document_server))
-}
-
-document_server <- function(board, update, ...) {
+md_server <- function(board, update, session, parent, ...) {
   moduleServer(
     "doc",
     function(input, output, session) {
@@ -16,6 +12,19 @@ document_server <- function(board, update, ...) {
           session,
           "ace",
           theme = ace_theme()
+        )
+      )
+
+      res <- reactiveVal()
+
+      observeEvent(input$ace, res(input$ace))
+
+      observeEvent(
+        req(parent$refreshed == "network"),
+        shinyAce::updateAceEditor(
+          session,
+          "ace",
+          parent$module_state$document()
         )
       )
 
@@ -97,6 +106,8 @@ document_server <- function(board, update, ...) {
           removeModal()
         }
       )
+
+      res
     }
   )
 }
