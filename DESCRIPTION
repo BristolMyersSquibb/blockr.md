@@ -26,7 +26,8 @@ Imports:
     webshot2,
     magick,
     evaluate,
-    blockr.ui (>= 1.0.1)
+    blockr.ui (>= 1.0.1),
+    shinycssloaders
 Suggests:
     pdftools
 Remotes:

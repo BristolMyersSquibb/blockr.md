@@ -21,11 +21,14 @@ md_server <- function(board, update, session, parent, ...) {
 
       observeEvent(
         req(parent$refreshed == "network"),
-        shinyAce::updateAceEditor(
-          session,
-          "ace",
-          parent$module_state$document()
-        )
+        {
+          req(parent$module_state$document)
+          shinyAce::updateAceEditor(
+            session,
+            "ace",
+            parent$module_state$document()
+          )
+        }
       )
 
       ast <- tempfile(fileext = ".json")
@@ -38,22 +41,26 @@ md_server <- function(board, update, session, parent, ...) {
 
           dir.create(tmp)
 
-          filter_md(
-            block_filter,
-            blocks = lst_xtr(board$blocks, "server", "result"),
-            temp_dir = normalizePath(tmp),
-            doc = input$ace,
-            output = ast
-          )
-
           md <- tempfile()
           on.exit(unlink(md))
 
-          rmarkdown::pandoc_convert(
-            input = ast,
-            from = "json",
-            to = "markdown",
-            output = md
+          shinycssloaders::showPageSpinner(
+            {
+              filter_md(
+                block_filter,
+                blocks = lst_xtr(board$blocks, "server", "result"),
+                temp_dir = normalizePath(tmp),
+                doc = input$ace,
+                output = ast
+              )
+
+              rmarkdown::pandoc_convert(
+                input = ast,
+                from = "json",
+                to = "markdown",
+                output = md
+              )
+            }
           )
 
           showModal(
