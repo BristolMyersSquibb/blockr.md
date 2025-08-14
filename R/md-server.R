@@ -105,20 +105,25 @@ gen_md_server <- function(pptx_template) {
             )
           },
           function(file) {
-            # template has to be at the same level as the output file for pandoc
-            file.copy(pptx_template, dirname(file), overwrite = TRUE)
-            rmarkdown::pandoc_convert(
-              input = ast,
-              from = "json",
-              to = "pptx",
-              output = file,
-              options = c(
+            pandoc_opts <- NULL
+            if (length(pptx_template)) {
+              # template has to be at the same level as the output file for pandoc
+              file.copy(pptx_template, dirname(file), overwrite = TRUE)
+              pandoc_opts <- c(
                 sprintf(
                   "--reference-doc=%s",
                   basename(pptx_template)
                 ),
                 "--slide-level=2"
               )
+            }
+
+            rmarkdown::pandoc_convert(
+              input = ast,
+              from = "json",
+              to = "pptx",
+              output = file,
+              options = pandoc_opts
             )
           }
         )
