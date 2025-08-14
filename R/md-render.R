@@ -42,8 +42,8 @@ md_render.recordedplot <- function(x, value, dir = tempdir(), ...) {
     label = "abc",
     fig.width = 6.5,
     fig.height = 4.5,
-    dev = "pdf",
-    fig.ext = "pdf",
+    dev = "png",
+    fig.ext = "png",
     dpi = 72,
     fig.show = TRUE,
     fig.path = paste0(dir, "/")
@@ -76,7 +76,9 @@ md_render.data.frame <- function(x, ...) {
 #' @export
 md_render.gt_tbl <- function(x, value, dir = tempdir(), ...) {
 
-  res <- tempfile(tmpdir = dir, fileext = ".pdf")
+  browser()
+
+  res <- tempfile(tmpdir = dir, fileext = ".png")
   tmp <- tempfile(fileext = ".html")
 
   on.exit(unlink(tmp))
@@ -87,10 +89,10 @@ md_render.gt_tbl <- function(x, value, dir = tempdir(), ...) {
 
   webshot2::webshot(tmp, res, delay = 0, quiet = TRUE)
 
-  img <- magick::image_read_pdf(res)
+  img <- magick::image_read(res)
   crp <- magick::image_trim(img)
 
-  magick::image_write(crp, res, format = "pdf")
+  magick::image_write(crp, res, format = "png")
 
   md_render(new_file(res, dir), value, dir, ...)
 }
