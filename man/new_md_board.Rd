@@ -11,11 +11,11 @@
 \alias{md_render.data.frame}
 \alias{md_render.gt_tbl}
 \alias{md_render.flextable}
-\alias{md_server}
+\alias{gen_md_server}
 \alias{gen_md_ui}
 \title{Markdown board}
 \usage{
-new_md_board(..., document = character())
+new_md_board(..., document = character(), pptx_template = file.path())
 
 md_render(x, value, dir = tempdir(), ...)
 
@@ -33,7 +33,7 @@ md_render(x, value, dir = tempdir(), ...)
 
 \method{md_render}{flextable}(x, ...)
 
-md_server(board, update, session, parent, ...)
+gen_md_server(pptx_template)
 
 gen_md_ui(content = character())
 }
@@ -42,11 +42,11 @@ gen_md_ui(content = character())
 
 \item{document}{Initial document}
 
+\item{pptx_template}{Path to custom PowerPoint template. Default is NULL}
+
 \item{value}{Current md block value}
 
 \item{dir}{Where to place files (like images)}
-
-\item{update, session, parent}{See \code{\link[blockr.ui:main]{blockr.ui::main_server()}}}
 
 \item{content}{Initial content}
 }

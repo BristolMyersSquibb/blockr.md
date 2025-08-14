@@ -1,120 +1,139 @@
-#' @param update,session,parent See [blockr.ui::main_server()]
+#' @param pptx_template Path to custom PowerPoint template. Default is NULL
 #' @rdname new_md_board
 #' @export
-md_server <- function(board, update, session, parent, ...) {
-  moduleServer(
-    "doc",
-    function(input, output, session) {
+gen_md_server <- function(pptx_template) {
+  if (length(pptx_template)) {
+    pptx_template <- file.path(pptx_template)
+    stopifnot(file.exists(pptx_template))
+  }
 
-      observeEvent(
-        get_board_option_or_default("dark_mode"),
-        shinyAce::updateAceEditor(
-          session,
-          "ace",
-          theme = ace_theme()
-        )
-      )
-
-      res <- reactiveVal()
-
-      observeEvent(input$ace, res(input$ace))
-
-      observeEvent(
-        req(parent$refreshed == "network"),
-        {
-          req(parent$module_state$document)
+  function(board, update, session, parent, ...) {
+    moduleServer(
+      "doc",
+      function(input, output, session) {
+        observeEvent(
+          get_board_option_or_default("dark_mode"),
           shinyAce::updateAceEditor(
             session,
             "ace",
-            parent$module_state$document()
+            theme = ace_theme()
           )
-        }
-      )
+        )
 
-      ast <- tempfile(fileext = ".json")
-      tmp <- tempfile()
+        res <- reactiveVal()
 
-      observeEvent(
-        input$render,
-        {
-          req(input$ace)
+        observeEvent(input$ace, res(input$ace))
 
-          dir.create(tmp)
+        observeEvent(
+          req(parent$refreshed == "network"),
+          {
+            req(parent$module_state$document)
+            shinyAce::updateAceEditor(
+              session,
+              "ace",
+              parent$module_state$document()
+            )
+          }
+        )
 
-          md <- tempfile()
-          on.exit(unlink(md))
+        ast <- tempfile(fileext = ".json")
+        tmp <- tempfile()
 
-          shinycssloaders::showPageSpinner(
-            {
-              filter_md(
-                block_filter,
-                blocks = lst_xtr(board$blocks, "server", "result"),
-                temp_dir = normalizePath(tmp),
-                doc = input$ace,
-                output = ast
-              )
+        observeEvent(
+          input$render,
+          {
+            req(input$ace)
 
-              rmarkdown::pandoc_convert(
-                input = ast,
-                from = "json",
-                to = "markdown",
-                output = md
-              )
-            }
-          )
+            dir.create(tmp)
 
-          showModal(
-            modalDialog(
-              title = "MD preview",
-              shinyAce::aceEditor(
-                "preview",
-                readLines(md),
-                mode = "markdown",
-                theme = ace_theme(),
-                readOnly = TRUE
-              ),
-              size = "l",
-              footer = tagList(
-                downloadButton(
-                  session$ns("dl_ppt"),
-                  label = "Download PPT",
-                  class = "btn-success"
+            md <- tempfile()
+            on.exit(unlink(md))
+
+            shinycssloaders::showPageSpinner(
+              {
+                filter_md(
+                  block_filter,
+                  blocks = lst_xtr(board$blocks, "server", "result"),
+                  temp_dir = normalizePath(tmp),
+                  doc = input$ace,
+                  output = ast
+                )
+
+                rmarkdown::pandoc_convert(
+                  input = ast,
+                  from = "json",
+                  to = "markdown",
+                  output = md
+                )
+              }
+            )
+
+            showModal(
+              modalDialog(
+                title = "MD preview",
+                shinyAce::aceEditor(
+                  "preview",
+                  readLines(md),
+                  mode = "markdown",
+                  theme = ace_theme(),
+                  readOnly = TRUE
                 ),
-                actionButton(
-                  session$ns("close_modal"),
-                  label = "Close",
-                  class = "btn-danger"
+                size = "l",
+                footer = tagList(
+                  downloadButton(
+                    session$ns("dl_ppt"),
+                    label = "Download PPT",
+                    class = "btn-success"
+                  ),
+                  actionButton(
+                    session$ns("close_modal"),
+                    label = "Close",
+                    class = "btn-danger"
+                  )
                 )
               )
             )
-          )
-        }
-      )
-
-      output$dl_ppt <- downloadHandler(
-        function() paste0(
-          "topline_",
-          format(Sys.time(), "%Y-%m-%d_%H-%M-%S"),
-          ".pptx"
-        ),
-        function(file) rmarkdown::pandoc_convert(
-          input = ast,
-          from = "json",
-          to = "pptx",
-          output = file
+          }
         )
-      )
 
-      observeEvent(
-        input$close_modal,
-        {
-          unlink(ast)
-          unlink(tmp, recursive = TRUE)
-          removeModal()
-        }
-      )
+        output$dl_ppt <- downloadHandler(
+          function() {
+            paste0(
+              "topline_",
+              format(Sys.time(), "%Y-%m-%d_%H-%M-%S"),
+              ".pptx"
+            )
+          },
+          function(file) {
+            # template has to be at the same level as the output file for pandoc
+            file.copy(pptx_template, dirname(file), overwrite = TRUE)
+            rmarkdown::pandoc_convert(
+              input = ast,
+              from = "json",
+              to = "pptx",
+              output = file,
+              options = c(
+                sprintf(
+                  "--reference-doc=%s",
+                  basename(pptx_template)
+                ),
+                "--slide-level=2"
+              )
+            )
+          }
+        )
 
-      res
-    }
-  )
+        observeEvent(
+          input$close_modal,
+          {
+            unlink(ast)
+            unlink(tmp, recursive = TRUE)
+            removeModal()
+          }
+        )
+
+        res
+      }
+    )
+  }
 }

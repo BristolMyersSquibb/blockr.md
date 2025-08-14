@@ -4,12 +4,17 @@
 #'
 #' @param ... Board attributes
 #' @param document Initial document
+#' @param pptx_template Path to a PowerPoint template.
 #'
 #' @export
-new_md_board <- function(..., document = character()) {
+new_md_board <- function(
+  ...,
+  document = character(),
+  pptx_template = file.path()
+) {
   blockr.ui::new_dag_board(
     ...,
-    modules = new_md_module(content = document),
+    modules = new_md_module(content = document, pptx_template = pptx_template),
     class = "md_board"
   )
 }
