@@ -1,10 +1,10 @@
 #' @param pptx_template Path to custom PowerPoint template. Default is NULL
 #' @rdname new_md_board
 #' @export
-gen_md_server <- function(pptx_template) {
+gen_md_server <- function(pptx_template = NULL) {
+
   if (length(pptx_template)) {
-    pptx_template <- file.path(pptx_template)
-    stopifnot(file.exists(pptx_template))
+    pptx_template <- normalizePath(pptx_template, mustWork = TRUE)
   }
 
   function(board, update, session, parent, ...) {
@@ -105,15 +105,16 @@ gen_md_server <- function(pptx_template) {
             )
           },
           function(file) {
+
             pandoc_opts <- NULL
+
             if (length(pptx_template)) {
-              # template has to be at the same level as the output file for pandoc
+
               file.copy(pptx_template, dirname(file), overwrite = TRUE)
+              on.exit(unlink(file.path(dirname(file), pptx_template)))
+
               pandoc_opts <- c(
-                sprintf(
-                  "--reference-doc=%s",
-                  basename(pptx_template)
-                ),
+                paste0("--reference-doc=", basename(pptx_template)),
                 "--slide-level=2"
               )
             }
