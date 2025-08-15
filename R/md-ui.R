@@ -16,6 +16,10 @@ gen_md_ui <- function(content = character()) {
       actionButton(
         NS(id, "render"),
         "Render"
+      ),
+      fileInput(
+        NS(id, "template"),
+        "Powerpoint template"
       )
     )
   }

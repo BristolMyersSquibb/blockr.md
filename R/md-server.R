@@ -108,13 +108,20 @@ gen_md_server <- function(pptx_template = NULL) {
 
             pandoc_opts <- NULL
 
-            if (length(pptx_template)) {
+            if (length(pptx_template) || isTruthy(input$template)) {
 
-              file.copy(pptx_template, dirname(file), overwrite = TRUE)
-              on.exit(unlink(file.path(dirname(file), pptx_template)))
+              trg <- file.path(dirname(file), "template.pptx")
+
+              if (isTruthy(input$template)) {
+                file.copy(input$template$datapath, trg, overwrite = TRUE)
+              } else {
+                file.copy(pptx_template, trg, overwrite = TRUE)
+              }
+
+              on.exit(unlink(trg))
 
               pandoc_opts <- c(
-                paste0("--reference-doc=", basename(pptx_template)),
+                paste0("--reference-doc=", basename(trg)),
                 "--slide-level=2"
               )
             }
