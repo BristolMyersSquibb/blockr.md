@@ -76,8 +76,6 @@ md_render.data.frame <- function(x, ...) {
 #' @export
 md_render.gt_tbl <- function(x, value, dir = tempdir(), ...) {
 
-  browser()
-
   res <- tempfile(tmpdir = dir, fileext = ".png")
   tmp <- tempfile(fileext = ".html")
 
