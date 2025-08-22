@@ -15,7 +15,7 @@
 \alias{gen_md_ui}
 \title{Markdown board}
 \usage{
-new_md_board(..., document = character(), pptx_template = file.path())
+new_md_board(..., document = character(), pptx_template = NULL)
 
 md_render(x, value, dir = tempdir(), ...)
 
@@ -33,7 +33,7 @@ md_render(x, value, dir = tempdir(), ...)
 
 \method{md_render}{flextable}(x, ...)
 
-gen_md_server(pptx_template)
+gen_md_server(pptx_template = NULL)
 
 gen_md_ui(content = character())
 }
