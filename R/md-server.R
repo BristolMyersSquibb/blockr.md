@@ -1,11 +1,7 @@
+#' @param update,session,parent See [blockr.ui::main_server()]
+#' @rdname new_md_board
 #' @export
-serve.md_board <- function(x, id = rand_names(),
-													 plugins = board_plugins(), ...) {
-
-	NextMethod(callbacks = list(document_server))
-}
-
-document_server <- function(board, update, ...) {
+md_server <- function(board, update, session, parent, ...) {
   moduleServer(
     "doc",
     function(input, output, session) {
@@ -19,6 +15,22 @@ document_server <- function(board, update, ...) {
         )
       )
 
+      res <- reactiveVal()
+
+      observeEvent(input$ace, res(input$ace))
+
+      observeEvent(
+        req(parent$refreshed == "network"),
+        {
+          req(parent$module_state$document)
+          shinyAce::updateAceEditor(
+            session,
+            "ace",
+            parent$module_state$document()
+          )
+        }
+      )
+
       ast <- tempfile(fileext = ".json")
       tmp <- tempfile()
 
@@ -29,22 +41,26 @@ document_server <- function(board, update, ...) {
 
           dir.create(tmp)
 
-          filter_md(
-            block_filter,
-            blocks = lst_xtr(board$blocks, "server", "result"),
-            temp_dir = normalizePath(tmp),
-            doc = input$ace,
-            output = ast
-          )
-
           md <- tempfile()
           on.exit(unlink(md))
 
-          rmarkdown::pandoc_convert(
-            input = ast,
-            from = "json",
-            to = "markdown",
-            output = md
+          shinycssloaders::showPageSpinner(
+            {
+              filter_md(
+                block_filter,
+                blocks = lst_xtr(board$blocks, "server", "result"),
+                temp_dir = normalizePath(tmp),
+                doc = input$ace,
+                output = ast
+              )
+
+              rmarkdown::pandoc_convert(
+                input = ast,
+                from = "json",
+                to = "markdown",
+                output = md
+              )
+            }
           )
 
           showModal(
@@ -97,6 +113,8 @@ document_server <- function(board, update, ...) {
           removeModal()
         }
       )
+
+      res
     }
   )
 }

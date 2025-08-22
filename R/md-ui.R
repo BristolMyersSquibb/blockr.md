@@ -1,42 +1,22 @@
-#' @param id Namespace ID
+#' @param content Initial content
 #' @rdname new_md_board
 #' @export
-doc_ui <- function(id, x) {
+gen_md_ui <- function(content = character()) {
 
-  id <- NS(id, "doc")
+  function(id, board, ...) {
 
-  bslib::card(
-    bslib::card_header(
-      "Document builder",
-      actionButton(
-        NS(id, "render"),
-        bsicons::bs_icon("box-arrow-up"),
-        class = c("border-0", "p-0")
-      ),
-      class = "d-flex justify-content-between"
-    ),
-    bslib::card_body(
+    id <- NS(id, "doc")
+
+    tagList(
       shinyAce::aceEditor(
         NS(id, "ace"),
-        board_doc(x),
+        content,
         mode = "markdown"
+      ),
+      actionButton(
+        NS(id, "render"),
+        "Render"
       )
     )
-  )
-
-}
-
-#' @export
-board_ui.md_board <- function(id, x, plugins = list(), ...) {
-
-  tagList(
-    toolbar_ui(id, x, plugins),
-    board_ui(id, plugins[["notify_user"]], x),
-    doc_ui(id, x),
-    div(
-      id = paste0(id, "_board"),
-      stack_ui(id, x, edit_ui = plugins[["edit_stack"]]),
-      block_ui(id, x, edit_ui = plugins[["edit_block"]])
-    )
-  )
+  }
 }
