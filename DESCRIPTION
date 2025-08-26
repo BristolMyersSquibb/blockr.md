@@ -31,4 +31,5 @@ Imports:
 Suggests:
     pdftools
 Remotes:
-    BristolMyersSquibb/blockr.ui#78
+    BristolMyersSquibb/blockr.ui,
+    BristolMyersSquibb/blockr.core

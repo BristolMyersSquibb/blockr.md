@@ -1,5 +1,5 @@
 #' @export
-serve.md_board <- function(x) {
+serve.md_board <- function(x, id = "main", ...) {
 
   ace_placeholder <- shinyAce::aceEditor(
     "placeholder",
