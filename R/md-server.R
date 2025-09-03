@@ -1,4 +1,5 @@
-#' @param pptx_template Path to custom PowerPoint template. Default is NULL
+#' @param pptx_template Path to custom PowerPoint template. Use \code{blockr_template("pandoc-default.pptx")}
+#'   for the bundled default template. Default is NULL (no template)
 #' @rdname new_md_board
 #' @export
 gen_md_server <- function(pptx_template = NULL) {
@@ -108,16 +109,24 @@ gen_md_server <- function(pptx_template = NULL) {
 
             pandoc_opts <- NULL
 
-            if (length(pptx_template) || isTruthy(input$template)) {
+            # Determine which template to use: custom upload > function parameter > selected bundled template
+            template_path <- NULL
+            
+            if (isTruthy(input$template)) {
+              # Custom uploaded template takes precedence
+              template_path <- input$template$datapath
+            } else if (length(pptx_template)) {
+              # Function parameter template
+              template_path <- pptx_template
+            } else if (!is.null(input$template_select)) {
+              # Selected bundled template
+              template_path <- blockr_template(input$template_select)
+            }
 
+            if (!is.null(template_path)) {
               trg <- file.path(dirname(file), "template.pptx")
-
-              if (isTruthy(input$template)) {
-                file.copy(input$template$datapath, trg, overwrite = TRUE)
-              } else {
-                file.copy(pptx_template, trg, overwrite = TRUE)
-              }
-
+              file.copy(template_path, trg, overwrite = TRUE)
+              
               on.exit(unlink(trg))
 
               pandoc_opts <- c(
