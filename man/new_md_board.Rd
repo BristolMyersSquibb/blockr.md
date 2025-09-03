@@ -15,7 +15,12 @@
 \alias{gen_md_ui}
 \title{Markdown board}
 \usage{
-new_md_board(..., document = character(), pptx_template = NULL)
+new_md_board(
+  ...,
+  document = character(),
+  modules = list(),
+  pptx_template = NULL
+)
 
 md_render(x, value, dir = tempdir(), ...)
 
@@ -41,6 +46,8 @@ gen_md_ui(content = character())
 \item{...}{Board attributes}
 
 \item{document}{Initial document}
+
+\item{modules}{Additional modules to add to the board. See \code{\link[blockr.ui:board-module]{blockr.ui::new_chat_module()}}.}
 
 \item{pptx_template}{Path to custom PowerPoint template. Default is NULL}
 
