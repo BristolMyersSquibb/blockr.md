@@ -112,8 +112,8 @@ gen_md_server <- function(pptx_template = NULL) {
             # Determine which template to use: custom upload > function parameter > selected bundled template
             template_path <- NULL
             
-            if (isTruthy(input$template)) {
-              # Custom uploaded template takes precedence
+            if (isTruthy(input$use_custom_template) && isTruthy(input$template)) {
+              # Custom uploaded template (only if checkbox is checked and file is uploaded)
               template_path <- input$template$datapath
             } else if (length(pptx_template)) {
               # Function parameter template

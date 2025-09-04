@@ -36,9 +36,7 @@ get_default_template <- function() {
 #' @rdname new_md_board
 #' @export
 gen_md_ui <- function(content = character()) {
-
   function(id, board, ...) {
-
     id <- NS(id, "doc")
 
     tagList(
@@ -47,23 +45,39 @@ gen_md_ui <- function(content = character()) {
         content,
         mode = "markdown"
       ),
-      actionButton(
-        NS(id, "render"),
-        "Render"
-      ),
       div(
-        style = "margin-bottom: 10px;",
+        class = "d-flex align-items-center",
+
         selectInput(
           NS(id, "template_select"),
-          "PowerPoint Template",
+          NULL,
           choices = get_template_choices(),
-          selected = get_default_template()
+          selected = get_default_template(),
+          width = "100%"
+        ),
+        actionButton(
+          NS(id, "render"),
+          "Render",
+          class = "btn-success btn-sm",
+          style = "margin-left: 10px; margin-top: -18px; height: 36px;"
         )
       ),
-      fileInput(
-        NS(id, "template"),
-        "Upload Custom Template",
-        placeholder = "Optional: Override with custom template"
+      div(
+        class = "mb-3",
+        checkboxInput(
+          NS(id, "use_custom_template"),
+          tags$small(class = "text-muted", "Use custom template"),
+          value = FALSE
+        ),
+        conditionalPanel(
+          condition = paste0("input['", NS(id, "use_custom_template"), "']"),
+          fileInput(
+            NS(id, "template"),
+            NULL,
+            placeholder = "Select .pptx template file",
+            accept = ".pptx"
+          )
+        )
       )
     )
   }
