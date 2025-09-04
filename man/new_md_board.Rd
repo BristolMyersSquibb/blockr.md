@@ -47,7 +47,10 @@ gen_md_ui(content = character())
 
 \item{document}{Initial document}
 
+\item{modules}{Additional modules to add to the board. See \code{\link[blockr.ui:board-module]{blockr.ui::new_chat_module()}}.}
 
+\item{pptx_template}{Path to custom PowerPoint template. Use \code{blockr_template("pandoc-default.pptx")}
+for the bundled default template. Default is NULL (no template)}
 
 \item{value}{Current md block value}
 
@@ -57,15 +60,4 @@ gen_md_ui(content = character())
 }
 \description{
 A markdown board pairs blockr functionality with a document builder.
-}
-\examples{
-# Use BMS template (default, recommended)
-board <- new_md_board(pptx_template = blockr_template("bms-template.pptx"))
-
-# Use pandoc default template
-board <- new_md_board(pptx_template = blockr_template("pandoc-default.pptx"))
-
-# Use custom template
-board <- new_md_board(pptx_template = "path/to/custom-template.pptx")
-
 }

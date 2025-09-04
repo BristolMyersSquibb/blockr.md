@@ -10,7 +10,8 @@ list_blockr_templates()
 Character vector of available template names
 }
 \description{
-List available PowerPoint templates
+Lists templates available from blockr.md and blockr.internal (if installed).
+Internal templates take precedence over public ones when both exist.
 }
 \examples{
 list_blockr_templates()

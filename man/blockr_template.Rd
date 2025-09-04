@@ -8,19 +8,23 @@ blockr_template(template = NULL)
 }
 \arguments{
 \item{template}{Name of the template file. If NULL, returns the templates directory.
-Available templates: "bms-template.pptx" (default), "pandoc-default.pptx"}
+Available templates depend on whether blockr.internal is installed:
+\itemize{
+\item With blockr.internal: "bms-template.pptx" (from internal), "pandoc-default.pptx" (from blockr.md)
+\item Without blockr.internal: "pandoc-default.pptx" (default)
+}}
 }
 \value{
 Character path to the template file or templates directory
 }
 \description{
 This function returns the path to PowerPoint templates bundled with the
-blockr.md package. These templates are guaranteed to work with pandoc
-without corruption issues.
+blockr.md package. If blockr.internal is available, it will prefer internal
+templates for proprietary content, otherwise it falls back to default templates.
 }
 \examples{
-# Get BMS template (default)
-bms_template <- blockr_template("bms-template.pptx")
+# Get BMS template (if blockr.internal is available, otherwise pandoc default)
+template <- blockr_template("bms-template.pptx")
 
 # Get pandoc default template
 default_template <- blockr_template("pandoc-default.pptx")
