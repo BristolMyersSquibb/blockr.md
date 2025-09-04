@@ -49,7 +49,8 @@ gen_md_ui(content = character())
 
 \item{modules}{Additional modules to add to the board. See \code{\link[blockr.ui:board-module]{blockr.ui::new_chat_module()}}.}
 
-\item{pptx_template}{Path to custom PowerPoint template. Default is NULL}
+\item{pptx_template}{Path to custom PowerPoint template. Use \code{blockr_template("pandoc-default.pptx")}
+for the bundled default template. Default is NULL (no template)}
 
 \item{value}{Current md block value}
 
