@@ -5,7 +5,7 @@ block_filter <- function(key, value, blocks, temp_dir) {
     res <- block_filter(value[[1L]][["t"]], value[[1L]][["c"]], blocks,
                         temp_dir)
 
-    if (inherits(res, "md_raw")) {
+    if (inherits(res, "md_raw") || inherits(res, "lolobo")) {
       return(res)
     }
 
@@ -66,12 +66,12 @@ has_ct <- function(x) {
   setequal(c("c", "t"), names(x))
 }
 
-filter_md <- function(fun, ..., doc, output = tempfile(fileext = ".json")) {
+md_to_json <- function(doc) {
 
-  tmp <- tempfile(fileext = ".md")
   ast <- tempfile(fileext = ".json")
+  tmp <- tempfile(fileext = ".md")
 
-  on.exit(unlink(c(tmp)))
+  on.exit(unlink(c(tmp, ast)))
 
   writeLines(doc, tmp)
 
@@ -82,7 +82,12 @@ filter_md <- function(fun, ..., doc, output = tempfile(fileext = ".json")) {
     output = ast
   )
 
-  json <- jsonlite::read_json(ast, flatten = TRUE)
+  jsonlite::read_json(ast, flatten = TRUE)
+}
+
+filter_md <- function(fun, ..., doc, output = tempfile(fileext = ".json")) {
+
+  json <- md_to_json(doc)
   proc <- astrapply(json, fun, ...)
 
   jsonlite::write_json(
@@ -128,6 +133,10 @@ astrapply <- function(x, fun, ...) {
         if (is.null(res)) {
 
           obj <- astrapply_append(obj, item, fun, ...)
+
+        } else if (inherits(res, "lolobo")) {
+
+          obj <- c(obj, unclass(res))
 
         } else if (is.list(res) && is.null(names(res))) {
 

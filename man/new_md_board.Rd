@@ -4,6 +4,7 @@
 \name{new_md_board}
 \alias{new_md_board}
 \alias{md_render}
+\alias{md_render.md_text}
 \alias{md_render.file}
 \alias{md_render.ggplot}
 \alias{md_render.recordedplot}
@@ -23,6 +24,8 @@ new_md_board(
 )
 
 md_render(x, value, dir = tempdir(), ...)
+
+\method{md_render}{md_text}(x, value, dir = tempdir(), ...)
 
 \method{md_render}{file}(x, value, dir = tempdir(), ...)
 

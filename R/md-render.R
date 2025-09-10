@@ -8,6 +8,12 @@ md_render <- function(x, value, dir = tempdir(), ...) {
 
 #' @rdname new_md_board
 #' @export
+md_render.md_text <- function(x, value, dir = tempdir(), ...) {
+  structure(md_to_json(x)[["blocks"]], class = "lolobo")
+}
+
+#' @rdname new_md_board
+#' @export
 md_render.file <- function(x, value, dir = tempdir(), ...) {
 
   stopifnot(is.character(x), length(x) == 1L, ...length() == 0L)

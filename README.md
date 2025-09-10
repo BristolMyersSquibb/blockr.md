@@ -26,16 +26,18 @@ A board with a simple plot block and a document that includes the
 corresponding plot can be creates as follows.
 
 ``` r
-library(blockr.core)
 library(blockr.md)
+library(blockr.core)
+library(blockr.ai)
 
 serve(
   new_md_board(
     blocks = c(
-      a = new_dataset_block("iris"),
-      b = new_scatter_block("Sepal.Length", "Sepal.Width")
+      a = new_dataset_block("mtcars"),
+      b = new_scatter_block("disp", "hp"),
+      c = new_llm_insights_block("List the 5 most powerful cars.")
     ),
-    links = list(from = "a", to = "b", input = "data"),
+    links = list(from = c("a", "a"), to = c("b", "c"), input = rep("data", 2)),
     document = c(
       "# My title",
       "",
@@ -45,7 +47,20 @@ serve(
       "",
       "## Slide with plot",
       "",
-      "![Sepal length vs width for iris species](blockr://b)"
+      "![Displacement (cu.in.) vs. gross horsepower](blockr://b)",
+      "",
+      "## Slide with AI text",
+      "",
+      "![](blockr://c)",
+      "",
+      "## Slide with MD text",
+      "",
+      "Some paragraph text.",
+      "",
+      "- bullet 1",
+      "- bullet 2",
+      "",
+      "That's it, that's all."
     )
   )
 )
