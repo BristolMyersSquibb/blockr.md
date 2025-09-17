@@ -104,16 +104,28 @@ md_render.gt_tbl <- function(x, value, dir = tempdir(), ...) {
 #' @rdname new_md_board
 #' @export
 md_render.flextable <- function(x, ...) {
+  # Get positioning from attributes or use defaults
+  offx <- attr(x, "pptx_left", exact = TRUE)
+  if (is.null(offx)) offx <- 1
+
+  offy <- attr(x, "pptx_top", exact = TRUE)
+  if (is.null(offy)) offy <- 2
+
+  cx <- attr(x, "pptx_width", exact = TRUE)
+  if (is.null(cx)) cx <- 10
+
+  cy <- attr(x, "pptx_height", exact = TRUE)
+  if (is.null(cy)) cy <- 6
 
   md_raw(
     "openxml",
     flextable:::gen_raw_pml(
       x,
       uid = as.integer(runif(n = 1) * 10^9),
-      offx = 1,
-      offy = 2,
-      cx = 10,
-      cy = 6
+      offx = offx,
+      offy = offy,
+      cx = cx,
+      cy = cy
     )
   )
 }
