@@ -4,16 +4,14 @@
 #'
 #' @param ... Board attributes
 #' @param document Initial document
-#' @param modules Additional modules to add to the board. See [blockr.ui::new_chat_module()].
+#' @param modules Additional modules to add to the board. See
+#' [blockr.ui::new_chat_module()].
 #' @param pptx_template Path to a PowerPoint template.
 #'
 #' @export
-new_md_board <- function(
-  ...,
-  document = character(),
-  modules = list(),
-  pptx_template = NULL
-) {
+new_md_board <- function(..., document = character(), modules = list(),
+                         pptx_template = NULL) {
+
   blockr.ui::new_dag_board(
     ...,
     modules = c(
@@ -22,4 +20,21 @@ new_md_board <- function(
     ),
     class = "md_board"
   )
+}
+
+#' @export
+board_plugins.md_board <- function(x, which = NULL) {
+
+  plugins <- NextMethod()
+
+  id <- match("preserve_board", names(plugins), nomatch = 0L)
+
+  if (id > 0L) {
+    plugins <- c(
+      plugins[-id],
+      blockr.session::manage_session()
+    )
+  }
+
+  plugins
 }

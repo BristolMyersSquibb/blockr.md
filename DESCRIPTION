@@ -27,9 +27,11 @@ Imports:
     magick,
     evaluate,
     blockr.ui (>= 1.0.1),
-    shinycssloaders
+    shinycssloaders,
+    blockr.session
 Suggests:
     pdftools
 Remotes:
     BristolMyersSquibb/blockr.ui,
-    BristolMyersSquibb/blockr.core
+    BristolMyersSquibb/blockr.core,
+    BristolMyersSquibb/blockr.session
