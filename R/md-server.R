@@ -26,9 +26,9 @@ gen_md_server <- function(pptx_template = NULL) {
         observeEvent(input$ace, res(input$ace))
 
         observeEvent(
-          req(parent$refreshed == "network"),
+          req(parent$refreshed == "restore-network"),
           {
-            req(parent$module_state$document)
+            req(parent$module_state$document())
             shinyAce::updateAceEditor(
               session,
               "ace",
