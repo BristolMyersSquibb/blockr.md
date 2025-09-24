@@ -25,18 +25,6 @@ gen_md_server <- function(pptx_template = NULL) {
 
         observeEvent(input$ace, res(input$ace))
 
-        observeEvent(
-          req(parent$refreshed == "restore-network"),
-          {
-            req(parent$module_state$document())
-            shinyAce::updateAceEditor(
-              session,
-              "ace",
-              parent$module_state$document()
-            )
-          }
-        )
-
         ast <- tempfile(fileext = ".json")
         tmp <- tempfile()
 
@@ -109,12 +97,15 @@ gen_md_server <- function(pptx_template = NULL) {
 
             pandoc_opts <- NULL
 
-            # Determine which template to use: custom upload > function parameter > selected bundled template
+            # Determine which template to use: custom upload > function
+            # parameter > selected bundled template
             template_path <- NULL
-            
-            if (isTruthy(input$use_custom_template) && isTruthy(input$template)) {
-              # Custom uploaded template (only if checkbox is checked and file is uploaded)
-              template_path <- input$template$datapath
+            inp_temp <- input$template
+
+            if (isTruthy(input$use_custom_template) && isTruthy(inp_temp)) {
+              # Custom uploaded template (only if checkbox is checked and file
+              # is uploaded)
+              template_path <- inp_temp$datapath
             } else if (length(pptx_template)) {
               # Function parameter template
               template_path <- pptx_template
@@ -126,7 +117,7 @@ gen_md_server <- function(pptx_template = NULL) {
             if (!is.null(template_path)) {
               trg <- file.path(dirname(file), "template.pptx")
               file.copy(template_path, trg, overwrite = TRUE)
-              
+
               on.exit(unlink(trg))
 
               pandoc_opts <- c(
