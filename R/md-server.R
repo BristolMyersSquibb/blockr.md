@@ -3,14 +3,13 @@
 #' @rdname new_md_board
 #' @export
 gen_md_server <- function(pptx_template = NULL) {
-
   if (length(pptx_template)) {
     pptx_template <- normalizePath(pptx_template, mustWork = TRUE)
   }
 
-  function(board, update, session, parent, ...) {
+  function(id, board, update, session, parent, ...) {
     moduleServer(
-      "doc",
+      id,
       function(input, output, session) {
         observeEvent(
           get_board_option_or_default("dark_mode"),
@@ -94,7 +93,6 @@ gen_md_server <- function(pptx_template = NULL) {
             )
           },
           function(file) {
-
             pandoc_opts <- NULL
 
             # Determine which template to use: custom upload > function
