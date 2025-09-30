@@ -37,11 +37,11 @@ get_default_template <- function() {
 #' @export
 gen_md_ui <- function(content = character()) {
   function(id, board, ...) {
-    id <- NS(id, "doc")
+    ns <- NS(id)
 
     tagList(
       shinyAce::aceEditor(
-        NS(id, "ace"),
+        ns("ace"),
         content,
         mode = "markdown"
       ),
@@ -49,14 +49,14 @@ gen_md_ui <- function(content = character()) {
         class = "d-flex align-items-center",
 
         selectInput(
-          NS(id, "template_select"),
+          ns("template_select"),
           NULL,
           choices = get_template_choices(),
           selected = get_default_template(),
           width = "100%"
         ),
         actionButton(
-          NS(id, "render"),
+          ns("render"),
           "Render",
           class = "btn-success btn-sm",
           style = "margin-left: 10px; margin-top: -18px; height: 36px;"
@@ -65,14 +65,14 @@ gen_md_ui <- function(content = character()) {
       div(
         class = "mb-3",
         checkboxInput(
-          NS(id, "use_custom_template"),
+          ns("use_custom_template"),
           tags$small(class = "text-muted", "Use custom template"),
           value = FALSE
         ),
         conditionalPanel(
-          condition = paste0("input['", NS(id, "use_custom_template"), "']"),
+          condition = paste0("input['", ns("use_custom_template"), "']"),
           fileInput(
-            NS(id, "template"),
+            ns("template"),
             NULL,
             placeholder = "Select .pptx template file",
             accept = ".pptx"
