@@ -3,7 +3,7 @@
 #' @rdname new_md_board
 #' @export
 md_render <- function(x, value, dir = tempdir(), ...) {
-	UseMethod("md_render", x)
+  UseMethod("md_render", x)
 }
 
 #' @rdname new_md_board
@@ -15,7 +15,6 @@ md_render.md_text <- function(x, value, dir = tempdir(), ...) {
 #' @rdname new_md_board
 #' @export
 md_render.file <- function(x, value, dir = tempdir(), ...) {
-
   stopifnot(is.character(x), length(x) == 1L, ...length() == 0L)
 
   x <- file.path(dir, x)
@@ -37,17 +36,28 @@ md_render.file <- function(x, value, dir = tempdir(), ...) {
 #' @rdname new_md_board
 #' @export
 md_render.ggplot <- function(x, ...) {
-  md_render(evaluate::evaluate("x"), ...)
+  # Store patchwork info in environment for recordedplot to access
+  is_patchwork <- inherits(x, "patchwork")
+  md_render(evaluate::evaluate("x"), ..., .is_patchwork = is_patchwork)
 }
 
 #' @rdname new_md_board
 #' @export
-md_render.recordedplot <- function(x, value, dir = tempdir(), ...) {
+md_render.recordedplot <- function(
+  x,
+  value,
+  dir = tempdir(),
+  ...,
+  .is_patchwork = FALSE
+) {
+  # Use wider dimensions for patchwork grid plots
+  fig_width <- if (.is_patchwork) 14 else 6.5
+  fig_height <- if (.is_patchwork) 5 else 4.5
 
   opts <- list(
     label = "abc",
-    fig.width = 6.5,
-    fig.height = 4.5,
+    fig.width = fig_width,
+    fig.height = fig_height,
     dev = "png",
     fig.ext = "png",
     dpi = 72,
@@ -63,11 +73,11 @@ md_render.recordedplot <- function(x, value, dir = tempdir(), ...) {
 #' @rdname new_md_board
 #' @export
 md_render.evaluate_evaluation <- function(x, ...) {
-
   hit <- lgl_ply(x, inherits, "recordedplot")
 
   stopifnot(sum(hit) == 1L)
 
+  # Pass through the .is_patchwork parameter
   md_render(x[[which(hit)]], ...)
 }
 
@@ -81,7 +91,6 @@ md_render.data.frame <- function(x, ...) {
 #' @rdname new_md_board
 #' @export
 md_render.gt_tbl <- function(x, value, dir = tempdir(), ...) {
-
   res <- tempfile(tmpdir = dir, fileext = ".png")
   tmp <- tempfile(fileext = ".html")
 
@@ -106,16 +115,24 @@ md_render.gt_tbl <- function(x, value, dir = tempdir(), ...) {
 md_render.flextable <- function(x, ...) {
   # Get positioning from attributes or use defaults
   offx <- attr(x, "pptx_left", exact = TRUE)
-  if (is.null(offx)) offx <- 1
+  if (is.null(offx)) {
+    offx <- 1
+  }
 
   offy <- attr(x, "pptx_top", exact = TRUE)
-  if (is.null(offy)) offy <- 2
+  if (is.null(offy)) {
+    offy <- 2
+  }
 
   cx <- attr(x, "pptx_width", exact = TRUE)
-  if (is.null(cx)) cx <- 10
+  if (is.null(cx)) {
+    cx <- 10
+  }
 
   cy <- attr(x, "pptx_height", exact = TRUE)
-  if (is.null(cy)) cy <- 6
+  if (is.null(cy)) {
+    cy <- 6
+  }
 
   md_raw(
     "openxml",
