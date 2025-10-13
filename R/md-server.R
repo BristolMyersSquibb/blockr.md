@@ -17,6 +17,45 @@ gen_md_server <- function(pptx_template = NULL) {
         # Reactive value for validation message
         validation_message <- reactiveVal("")
 
+        # Fix horizontal scrolling on initial load
+        observe({
+          editor_id <- session$ns("ace")
+
+          # Insert JavaScript to force word wrap and resize editor
+          shiny::insertUI(
+            selector = "body",
+            where = "beforeEnd",
+            immediate = TRUE,
+            ui = tags$script(HTML(sprintf("
+              (function() {
+                function setupEditor() {
+                  if (typeof ace === 'undefined') {
+                    setTimeout(setupEditor, 200);
+                    return;
+                  }
+                  var editorElement = document.getElementById('%s');
+                  if (!editorElement) {
+                    setTimeout(setupEditor, 200);
+                    return;
+                  }
+                  try {
+                    var editor = ace.edit('%s');
+                    // Force word wrap to be enabled
+                    editor.getSession().setUseWrapMode(true);
+                    // Resize after a delay to fix initial layout
+                    setTimeout(function() {
+                      editor.resize(true);
+                    }, 500);
+                  } catch(e) {
+                    console.error('Error setting up editor:', e);
+                  }
+                }
+                setupEditor();
+              })();
+            ", editor_id, editor_id)))
+          )
+        }, priority = -100)
+
         # Update block IDs for autocomplete when blocks change
         observe({
           block_ids <- names(board$blocks)

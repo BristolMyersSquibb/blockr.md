@@ -44,6 +44,7 @@ gen_md_ui <- function(content = character()) {
         ns("ace"),
         content,
         mode = "markdown",
+        wordWrap = TRUE,
         showInvisibles = TRUE,
         autoComplete = "live",
         autoCompleters = c("static"),
