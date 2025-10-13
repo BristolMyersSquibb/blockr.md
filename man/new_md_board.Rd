@@ -31,7 +31,7 @@ md_render(x, value, dir = tempdir(), ...)
 
 \method{md_render}{ggplot}(x, ...)
 
-\method{md_render}{recordedplot}(x, value, dir = tempdir(), ...)
+\method{md_render}{recordedplot}(x, value, dir = tempdir(), ..., .is_patchwork = FALSE)
 
 \method{md_render}{evaluate_evaluation}(x, ...)
 

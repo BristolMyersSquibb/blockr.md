@@ -43,7 +43,17 @@ gen_md_ui <- function(content = character()) {
       shinyAce::aceEditor(
         ns("ace"),
         content,
-        mode = "markdown"
+        mode = "markdown",
+        wordWrap = TRUE,
+        showInvisibles = TRUE,
+        autoComplete = "live",
+        autoCompleters = c("static"),
+        autoScrollEditorIntoView = FALSE,
+      ),
+      div(
+        class = "text-muted",
+        style = "margin-top: -10px; margin-bottom: 10px; font-size: 0.875rem;",
+        tags$small("Type 'block' to see available block IDs for autocomplete")
       ),
       div(
         class = "d-flex align-items-center",
