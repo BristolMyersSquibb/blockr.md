@@ -45,7 +45,7 @@ gen_md_ui <- function(content = character()) {
         content,
         mode = "markdown",
         wordWrap = TRUE,
-        showInvisibles = TRUE,
+        showInvisibles = FALSE,
         autoComplete = "live",
         autoCompleters = c("static"),
         autoScrollEditorIntoView = FALSE,
@@ -55,6 +55,7 @@ gen_md_ui <- function(content = character()) {
         style = "margin-top: -10px; margin-bottom: 10px; font-size: 0.875rem;",
         tags$small("Type 'block' to see available block IDs for autocomplete")
       ),
+      uiOutput(ns("validation_message")),
       div(
         class = "d-flex align-items-center",
 

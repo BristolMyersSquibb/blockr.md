@@ -18,15 +18,17 @@ gen_md_server <- function(pptx_template = NULL) {
         validation_message <- reactiveVal("")
 
         # Fix horizontal scrolling on initial load
-        observe({
-          editor_id <- session$ns("ace")
+        observe(
+          {
+            editor_id <- session$ns("ace")
 
-          # Insert JavaScript to force word wrap and resize editor
-          shiny::insertUI(
-            selector = "body",
-            where = "beforeEnd",
-            immediate = TRUE,
-            ui = tags$script(HTML(sprintf("
+            # Insert JavaScript to force word wrap and resize editor
+            shiny::insertUI(
+              selector = "body",
+              where = "beforeEnd",
+              immediate = TRUE,
+              ui = tags$script(HTML(sprintf(
+                "
               (function() {
                 function setupEditor() {
                   if (typeof ace === 'undefined') {
@@ -52,9 +54,14 @@ gen_md_server <- function(pptx_template = NULL) {
                 }
                 setupEditor();
               })();
-            ", editor_id, editor_id)))
-          )
-        }, priority = -100)
+            ",
+                editor_id,
+                editor_id
+              )))
+            )
+          },
+          priority = -100
+        )
 
         # Update block IDs for autocomplete when blocks change
         observe({
@@ -75,14 +82,17 @@ gen_md_server <- function(pptx_template = NULL) {
           )
 
           # Update again after a delay to ensure it takes effect on first load
-          later::later(function() {
-            shinyAce::updateAceEditor(
-              session,
-              "ace",
-              autoCompleters = c("static"),
-              autoCompleteList = list(blocks = completions)
-            )
-          }, delay = 1)
+          later::later(
+            function() {
+              shinyAce::updateAceEditor(
+                session,
+                "ace",
+                autoCompleters = c("static"),
+                autoCompleteList = list(blocks = completions)
+              )
+            },
+            delay = 1
+          )
         })
 
         observeEvent(
@@ -122,7 +132,8 @@ gen_md_server <- function(pptx_template = NULL) {
         # Debounced reactive for markdown content
         markdown_debounced <- reactive({
           input$ace
-        }) %>% debounce(1000)
+        }) %>%
+          debounce(300)
 
         # Validate block IDs when markdown changes (debounced)
         observe({
