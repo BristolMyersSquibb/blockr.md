@@ -49,6 +49,82 @@ gen_md_server <- function(pptx_template = NULL) {
 
         observeEvent(input$ace, res(input$ace))
 
+        # Helper function to extract block IDs from markdown
+        extract_block_ids_from_markdown <- function(markdown_text) {
+          if (length(markdown_text) == 0 || nchar(markdown_text) == 0) {
+            return(character())
+          }
+
+          # Extract all blockr:// references using regex
+          pattern <- "blockr://([a-zA-Z0-9_]+)"
+          matches <- gregexpr(pattern, markdown_text, perl = TRUE)
+
+          if (matches[[1]][1] == -1) {
+            return(character())
+          }
+
+          # Extract the captured groups (block IDs)
+          all_matches <- regmatches(markdown_text, matches)[[1]]
+          # Remove the "blockr://" prefix
+          block_ids <- gsub("^blockr://", "", all_matches)
+          unique(block_ids)
+        }
+
+        # Debounced reactive for markdown content
+        markdown_debounced <- reactive({
+          input$ace
+        }) %>% debounce(1000)
+
+        # Validate block IDs when markdown changes (debounced)
+        observe({
+          markdown <- markdown_debounced()
+
+          if (length(markdown) == 0 || nchar(markdown) == 0) {
+            validation_message("")
+            return()
+          }
+
+          # Extract block IDs from markdown
+          used_ids <- extract_block_ids_from_markdown(markdown)
+
+          if (length(used_ids) == 0) {
+            validation_message("")
+            return()
+          }
+
+          # Check which IDs are invalid
+          available_ids <- available_block_ids()
+          invalid_ids <- setdiff(used_ids, available_ids)
+
+          if (length(invalid_ids) > 0) {
+            msg <- sprintf(
+              "Warning: Invalid block ID%s: %s",
+              if (length(invalid_ids) > 1) "s" else "",
+              paste(invalid_ids, collapse = ", ")
+            )
+            validation_message(msg)
+          } else {
+            validation_message("")
+          }
+        })
+
+        # Render validation message
+        output$validation_message <- renderUI({
+          msg <- validation_message()
+
+          if (nchar(msg) == 0) {
+            return(NULL)
+          }
+
+          div(
+            class = "alert alert-danger",
+            role = "alert",
+            style = "margin-top: -5px; margin-bottom: 10px; padding: 8px 12px; font-size: 0.875rem;",
+            tags$strong("Error: "),
+            gsub("^Warning: ", "", msg)
+          )
+        })
+
         ast <- tempfile(fileext = ".json")
         tmp <- tempfile()
 
