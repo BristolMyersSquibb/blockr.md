@@ -11,6 +11,31 @@ gen_md_server <- function(pptx_template = NULL) {
     moduleServer(
       id,
       function(input, output, session) {
+        # Reactive value to store available block IDs
+        available_block_ids <- reactiveVal(character())
+
+        # Reactive value for validation message
+        validation_message <- reactiveVal("")
+
+        # Update block IDs for autocomplete when blocks change
+        observe({
+          block_ids <- names(board$blocks)
+
+          # Store block IDs for validation
+          available_block_ids(block_ids)
+
+          # Create completion list with full markdown image syntax
+          completions <- paste0("![](blockr://", block_ids, ")")
+
+          # Update autocomplete list
+          shinyAce::updateAceEditor(
+            session,
+            "ace",
+            autoCompleters = c("static"),
+            autoCompleteList = list(blocks = completions)
+          )
+        })
+
         observeEvent(
           get_board_option_or_default("dark_mode"),
           shinyAce::updateAceEditor(
