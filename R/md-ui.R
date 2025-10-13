@@ -40,6 +40,14 @@ gen_md_ui <- function(content = character()) {
     ns <- NS(id)
 
     tagList(
+      tags$style(HTML(sprintf(
+        "
+        #%s i {
+          display: none !important;
+        }
+      ",
+        ns("dl_ppt")
+      ))),
       shinyAce::aceEditor(
         ns("ace"),
         content,
@@ -66,11 +74,11 @@ gen_md_ui <- function(content = character()) {
           selected = get_default_template(),
           width = "100%"
         ),
-        actionButton(
-          ns("render"),
-          "Render",
-          class = "btn-success btn-sm",
-          style = "margin-left: 10px; margin-top: -18px; height: 36px;"
+        downloadButton(
+          ns("dl_ppt"),
+          "Download",
+          class = "btn-outline-success btn-sm",
+          style = "margin-left: 10px; margin-top: -18px; height: 36px; padding-top: 6.5px;"
         )
       ),
       div(

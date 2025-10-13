@@ -185,79 +185,40 @@ gen_md_server <- function(pptx_template = NULL) {
           )
         })
 
-        ast <- tempfile(fileext = ".json")
-        tmp <- tempfile()
-
-        observeEvent(
-          input$render,
-          {
-            req(input$ace)
-
-            dir.create(tmp)
-
-            md <- tempfile()
-            on.exit(unlink(md))
-
-            shinycssloaders::showPageSpinner(
-              {
-                filter_md(
-                  block_filter,
-                  blocks = lst_xtr(board$blocks, "server", "result"),
-                  temp_dir = normalizePath(tmp),
-                  doc = input$ace,
-                  output = ast
-                )
-
-                rmarkdown::pandoc_convert(
-                  input = ast,
-                  from = "json",
-                  to = "markdown",
-                  output = md
-                )
-              }
-            )
-
-            showModal(
-              modalDialog(
-                title = "MD preview",
-                shinyAce::aceEditor(
-                  "preview",
-                  readLines(md),
-                  mode = "markdown",
-                  theme = ace_theme(),
-                  readOnly = TRUE
-                ),
-                size = "l",
-                footer = tagList(
-                  downloadButton(
-                    session$ns("dl_ppt"),
-                    label = "Download PPT",
-                    class = "btn-success"
-                  ),
-                  actionButton(
-                    session$ns("close_modal"),
-                    label = "Close",
-                    class = "btn-danger"
-                  )
-                )
-              )
-            )
-          }
-        )
-
         output$dl_ppt <- downloadHandler(
-          function() {
+          filename = function() {
             paste0(
               "topline_",
               format(Sys.time(), "%Y-%m-%d_%H-%M-%S"),
               ".pptx"
             )
           },
-          function(file) {
-            pandoc_opts <- NULL
+          content = function(file) {
+            req(input$ace)
+
+            # Create temp files for processing
+            ast <- tempfile(fileext = ".json")
+            tmp <- tempfile()
+            dir.create(tmp)
+
+            # Ensure cleanup
+            on.exit({
+              unlink(ast)
+              unlink(tmp, recursive = TRUE)
+            })
+
+            # Process markdown to AST
+            filter_md(
+              block_filter,
+              blocks = lst_xtr(board$blocks, "server", "result"),
+              temp_dir = normalizePath(tmp),
+              doc = input$ace,
+              output = ast
+            )
 
             # Determine which template to use: custom upload > function
             # parameter > selected bundled template
+            pandoc_opts <- NULL
             template_path <- NULL
             inp_temp <- input$template
 
@@ -277,7 +238,7 @@ gen_md_server <- function(pptx_template = NULL) {
               trg <- file.path(dirname(file), "template.pptx")
               file.copy(template_path, trg, overwrite = TRUE)
 
-              on.exit(unlink(trg))
+              on.exit(unlink(trg), add = TRUE)
 
               pandoc_opts <- c(
                 paste0("--reference-doc=", basename(trg)),
@@ -285,6 +246,7 @@ gen_md_server <- function(pptx_template = NULL) {
               )
             }
 
+            # Convert AST to PowerPoint
             rmarkdown::pandoc_convert(
               input = ast,
               from = "json",
@@ -292,15 +254,6 @@ gen_md_server <- function(pptx_template = NULL) {
               output = file,
               options = pandoc_opts
             )
-          }
-        )
-
-        observeEvent(
-          input$close_modal,
-          {
-            unlink(ast)
-            unlink(tmp, recursive = TRUE)
-            removeModal()
           }
         )
 
