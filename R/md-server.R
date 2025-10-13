@@ -73,6 +73,16 @@ gen_md_server <- function(pptx_template = NULL) {
             autoCompleters = c("static"),
             autoCompleteList = list(blocks = completions)
           )
+
+          # Update again after a delay to ensure it takes effect on first load
+          later::later(function() {
+            shinyAce::updateAceEditor(
+              session,
+              "ace",
+              autoCompleters = c("static"),
+              autoCompleteList = list(blocks = completions)
+            )
+          }, delay = 1)
         })
 
         observeEvent(
