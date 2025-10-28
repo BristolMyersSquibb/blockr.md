@@ -1,10 +1,9 @@
 new_file <- function(x, dir) {
-
-	file <- basename(x)
+  file <- basename(x)
 
   stopifnot(file.exists(file.path(dir, file)))
 
-	structure(file, class = "file")
+  structure(file, class = "file")
 }
 
 ace_theme <- function(session = getDefaultReactiveDomain()) {
@@ -14,3 +13,5 @@ ace_theme <- function(session = getDefaultReactiveDomain()) {
     dark = "dracula"
   )
 }
+
+last <- function(x) x[[length(x)]]
