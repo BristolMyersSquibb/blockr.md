@@ -38,3 +38,10 @@ board_plugins.md_board <- function(x, which = NULL) {
 
   plugins
 }
+
+#' @export
+blockr_deser.md_board <- function(x, data, ...) {
+  res <- NextMethod()
+  class(res) <- c("md_board", class(res))
+  res
+}
