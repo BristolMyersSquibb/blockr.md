@@ -16,8 +16,6 @@ Imports:
     blockr.core (>= 0.1.1),
     shiny,
     shinyAce,
-    bsicons,
-    bslib,
     jsonlite,
     knitr,
     rmarkdown,
@@ -27,11 +25,16 @@ Imports:
     magick,
     evaluate,
     blockr.ui (>= 1.0.1),
-    shinycssloaders,
-    blockr.session
+    blockr.session,
+    blockr.dock,
+    later,
+    flextable
 Suggests:
-    pdftools
+    pdftools,
+    blockr,
+    blockr.internal
 Remotes:
     BristolMyersSquibb/blockr.ui,
     BristolMyersSquibb/blockr.core,
+    BristolMyersSquibb/blockr.internal,
     BristolMyersSquibb/blockr.session

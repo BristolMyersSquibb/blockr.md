@@ -56,9 +56,13 @@ gen_md_ui(content = character())
 \item{pptx_template}{Path to custom PowerPoint template. Use \code{blockr_template("pandoc-default.pptx")}
 for the bundled default template. Default is NULL (no template)}
 
+\item{x}{Object}
+
 \item{value}{Current md block value}
 
 \item{dir}{Where to place files (like images)}
+
+\item{.is_patchwork}{Patchwork plot}
 
 \item{content}{Initial content}
 }

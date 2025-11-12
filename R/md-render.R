@@ -1,3 +1,4 @@
+#' @param x Object
 #' @param dir Where to place files (like images)
 #' @param value Current md block value
 #' @rdname new_md_board
@@ -37,10 +38,14 @@ md_render.file <- function(x, value, dir = tempdir(), ...) {
 #' @export
 md_render.ggplot <- function(x, ...) {
   # Store patchwork info in environment for recordedplot to access
-  is_patchwork <- inherits(x, "patchwork")
-  md_render(evaluate::evaluate("x"), ..., .is_patchwork = is_patchwork)
+  md_render(
+    evaluate::evaluate("x"),
+    ...,
+    .is_patchwork = inherits(x, "patchwork")
+  )
 }
 
+#' @param .is_patchwork Patchwork plot
 #' @rdname new_md_board
 #' @export
 md_render.recordedplot <- function(
@@ -134,11 +139,14 @@ md_render.flextable <- function(x, ...) {
     cy <- 6
   }
 
+  gen_raw_pml <- get("gen_raw_pml", envir = asNamespace("flextable"),
+                     mode = "function", inherits = FALSE)
+
   md_raw(
     "openxml",
-    flextable:::gen_raw_pml(
+    gen_raw_pml(
       x,
-      uid = as.integer(runif(n = 1) * 10^9),
+      uid = sample(seq_len(10 ^ 9), 1),
       offx = offx,
       offy = offy,
       cx = cx,
