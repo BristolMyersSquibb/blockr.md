@@ -107,7 +107,18 @@ gen_md_server <- function(template = NULL) {
 
         res_doc <- reactiveVal()
 
-        observeEvent(input$ace, res(input$ace))
+        observeEvent(input$ace, res_doc(input$ace))
+
+        if (length(template)) {
+          observeEvent(
+            TRUE,
+            {
+              updateCheckboxInput(session, "use_custom_template", value = TRUE)
+              # TODO update file input
+            },
+            once = TRUE
+          )
+        }
 
         res_tpl <- reactive(
           {
