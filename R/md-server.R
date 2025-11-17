@@ -130,10 +130,14 @@ gen_md_server <- function(pptx_template = NULL) {
         }
 
         # Debounced reactive for markdown content
-        markdown_debounced <- reactive({
-          input$ace
-        }) |>
-          debounce(300)
+        markdown_debounced <- debounce(
+          reactive(
+            {
+              input$ace
+            }
+          ),
+          300
+        )
 
         # Validate block IDs when markdown changes (debounced)
         observe({

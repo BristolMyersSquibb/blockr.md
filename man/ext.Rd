@@ -7,11 +7,11 @@
 new_md_extension(content = character(), template = NULL, ...)
 }
 \arguments{
+\item{content}{Initial document}
+
 \item{template}{Path to a PowerPoint template.}
 
 \item{...}{Forwarded to \code{\link[blockr.dock:extension]{blockr.dock::new_dock_extension()}}}
-
-\item{document}{Initial document}
 }
 \description{
 A markdown extension adds a document builder.

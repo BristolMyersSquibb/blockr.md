@@ -6,12 +6,12 @@
 #' @keywords internal
 get_template_choices <- function() {
   if (requireNamespace("blockr.internal", quietly = TRUE)) {
-    setNames(
+    set_names(
       c("bms-template.pptx", "pandoc-default.pptx"),
       c("BMS Template (Internal)", "Pandoc Default")
     )
   } else {
-    setNames(
+    set_names(
       c("pandoc-default.pptx"),
       c("Pandoc Default")
     )

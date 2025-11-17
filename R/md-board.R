@@ -23,7 +23,7 @@ new_md_board <- function(..., document = character(), modules = list(),
 }
 
 #' @export
-board_plugins.md_board <- function(x, which = NULL) {
+board_plugins.md_board <- function(x, which = NULL, ...) {
 
   plugins <- NextMethod()
 

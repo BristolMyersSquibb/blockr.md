@@ -41,6 +41,8 @@ md_render.ggplot <- function(x, ...) {
   md_render(evaluate::evaluate("x"), ..., .is_patchwork = is_patchwork)
 }
 
+#' @param x Plot
+#' @param .is_patchwork Is plot a patchwork plot?
 #' @rdname new_md_board
 #' @export
 md_render.recordedplot <- function(
@@ -134,11 +136,14 @@ md_render.flextable <- function(x, ...) {
     cy <- 6
   }
 
+  gen_raw_pml <- get("gen_raw_pml", envir = asNamespace("flextable"),
+                     mode = "function", inherits = FALSE)
+
   md_raw(
     "openxml",
-    flextable:::gen_raw_pml(
+    gen_raw_pml(
       x,
-      uid = as.integer(runif(n = 1) * 10^9),
+      uid = sample(seq_len(10 ^ 9), 1L),
       offx = offx,
       offy = offy,
       cx = cx,

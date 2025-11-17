@@ -2,11 +2,11 @@
 #'
 #' A markdown extension adds a document builder.
 #'
-#' @param document Initial document
+#' @param content Initial document
 #' @param template Path to a PowerPoint template.
 #' @param ... Forwarded to [blockr.dock::new_dock_extension()]
 #'
-#' @rdname dag
+#' @rdname ext
 #' @export
 new_md_extension <- function(content = character(), template = NULL,
                               ...) {
