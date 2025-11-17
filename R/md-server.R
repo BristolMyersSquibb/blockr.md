@@ -1,10 +1,11 @@
-#' @param pptx_template Path to custom PowerPoint template. Use \code{blockr_template("pandoc-default.pptx")}
-#'   for the bundled default template. Default is NULL (no template)
+#' @param template Path to custom PowerPoint template. Use
+#' `blockr_template("pandoc-default.pptx")` for the bundled default template.
+#' Default is NULL (no template)
 #' @rdname new_md_board
 #' @export
-gen_md_server <- function(pptx_template = NULL) {
-  if (length(pptx_template)) {
-    pptx_template <- normalizePath(pptx_template, mustWork = TRUE)
+gen_md_server <- function(template = NULL) {
+  if (length(template)) {
+    template <- normalizePath(template, mustWork = TRUE)
   }
 
   function(id, board, update, session, parent, ...) {
@@ -104,9 +105,27 @@ gen_md_server <- function(pptx_template = NULL) {
           )
         )
 
-        res <- reactiveVal()
+        res_doc <- reactiveVal()
 
         observeEvent(input$ace, res(input$ace))
+
+        res_tpl <- reactive(
+          {
+            inp_temp <- input$template
+
+            if (isTruthy(input$use_custom_template) && isTruthy(inp_temp)) {
+              # Custom uploaded template (only if checkbox is checked and file
+              # is uploaded)
+              inp_temp$datapath
+            } else if (length(template)) {
+              # Function parameter template
+              template
+            } else if (!is.null(input$template_select)) {
+              # Selected bundled template
+              blockr_template(input$template_select)
+            }
+          }
+        )
 
         # Helper function to extract block IDs from markdown
         extract_block_ids_from_markdown <- function(markdown_text) {
@@ -223,20 +242,7 @@ gen_md_server <- function(pptx_template = NULL) {
             # Determine which template to use: custom upload > function
             # parameter > selected bundled template
             pandoc_opts <- NULL
-            template_path <- NULL
-            inp_temp <- input$template
-
-            if (isTruthy(input$use_custom_template) && isTruthy(inp_temp)) {
-              # Custom uploaded template (only if checkbox is checked and file
-              # is uploaded)
-              template_path <- inp_temp$datapath
-            } else if (length(pptx_template)) {
-              # Function parameter template
-              template_path <- pptx_template
-            } else if (!is.null(input$template_select)) {
-              # Selected bundled template
-              template_path <- blockr_template(input$template_select)
-            }
+            template_path <- res_tpl()
 
             if (!is.null(template_path)) {
               trg <- file.path(dirname(file), "template.pptx")
@@ -261,7 +267,10 @@ gen_md_server <- function(pptx_template = NULL) {
           }
         )
 
-        res
+        list(
+          content = res_doc,
+          template = res_tpl
+        )
       }
     )
   }
