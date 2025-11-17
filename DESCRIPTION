@@ -28,10 +28,12 @@ Imports:
     evaluate,
     blockr.ui (>= 1.0.1),
     shinycssloaders,
-    blockr.session
+    blockr.session,
+    blockr.dock
 Suggests:
     pdftools
 Remotes:
     BristolMyersSquibb/blockr.ui,
     BristolMyersSquibb/blockr.core,
-    BristolMyersSquibb/blockr.session
+    BristolMyersSquibb/blockr.session,
+    BristolMyersSquibb/blockr.dock
