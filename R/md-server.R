@@ -279,8 +279,7 @@ gen_md_server <- function(template = NULL) {
         )
 
         list(
-          content = res_doc,
-          template = res_tpl
+          content = res_doc
         )
       }
     )

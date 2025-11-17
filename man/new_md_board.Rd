@@ -41,7 +41,7 @@ md_render(x, value, dir = tempdir(), ...)
 
 \method{md_render}{flextable}(x, ...)
 
-gen_md_server(pptx_template = NULL)
+gen_md_server(template = NULL)
 
 gen_md_ui(content = character())
 }
@@ -53,8 +53,7 @@ gen_md_ui(content = character())
 \item{modules}{Additional modules to add to the board. See
 \code{\link[blockr.ui:board-module]{blockr.ui::new_chat_module()}}.}
 
-\item{pptx_template}{Path to custom PowerPoint template. Use \code{blockr_template("pandoc-default.pptx")}
-for the bundled default template. Default is NULL (no template)}
+\item{pptx_template}{Path to a PowerPoint template.}
 
 \item{x}{Plot}
 
@@ -63,6 +62,10 @@ for the bundled default template. Default is NULL (no template)}
 \item{dir}{Where to place files (like images)}
 
 \item{.is_patchwork}{Is plot a patchwork plot?}
+
+\item{template}{Path to custom PowerPoint template. Use
+\code{blockr_template("pandoc-default.pptx")} for the bundled default template.
+Default is NULL (no template)}
 
 \item{content}{Initial content}
 }
