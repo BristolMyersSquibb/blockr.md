@@ -1,7 +1,7 @@
 Package: blockr.md
 Title: Markdown builder for blockr
 Version: 0.0.1
-Authors@R: 
+Authors@R:
     c(person(given = "Nicolas",
              family = "Bennett",
              role = c("aut", "cre"),
@@ -24,17 +24,13 @@ Imports:
     webshot2,
     magick,
     evaluate,
-    blockr.ui (>= 1.0.1),
     blockr.session,
     blockr.dock,
     flextable,
     later
 Suggests:
     pdftools,
-    blockr.internal
 Remotes:
-    BristolMyersSquibb/blockr.ui,
     BristolMyersSquibb/blockr.core,
     BristolMyersSquibb/blockr.session,
-    BristolMyersSquibb/blockr.dock,
-    BristolMyersSquibb/blockr.internal
+    BristolMyersSquibb/blockr.dock
