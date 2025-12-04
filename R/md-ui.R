@@ -39,7 +39,8 @@ gen_md_ui <- function(content = character()) {
   function(id, board, ...) {
     ns <- NS(id)
 
-    tagList(
+    div(
+      style = "padding: 16px;",
       tags$style(HTML(sprintf(
         "
         #%s i {
