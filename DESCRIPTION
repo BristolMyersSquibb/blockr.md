@@ -24,13 +24,11 @@ Imports:
     webshot2,
     magick,
     evaluate,
-    blockr.session,
     blockr.dock,
     flextable,
     later
 Suggests:
-    pdftools,
+    pdftools
 Remotes:
     BristolMyersSquibb/blockr.core,
-    BristolMyersSquibb/blockr.session,
     BristolMyersSquibb/blockr.dock

@@ -1,18 +1,18 @@
 #' @param dir Where to place files (like images)
 #' @param value Current md block value
-#' @rdname new_md_board
+#' @rdname new_md_extension
 #' @export
 md_render <- function(x, value, dir = tempdir(), ...) {
   UseMethod("md_render", x)
 }
 
-#' @rdname new_md_board
+#' @rdname new_md_extension
 #' @export
 md_render.md_text <- function(x, value, dir = tempdir(), ...) {
   structure(md_to_json(x)[["blocks"]], class = "lolobo")
 }
 
-#' @rdname new_md_board
+#' @rdname new_md_extension
 #' @export
 md_render.file <- function(x, value, dir = tempdir(), ...) {
   stopifnot(is.character(x), length(x) == 1L, ...length() == 0L)
@@ -33,7 +33,7 @@ md_render.file <- function(x, value, dir = tempdir(), ...) {
   )
 }
 
-#' @rdname new_md_board
+#' @rdname new_md_extension
 #' @export
 md_render.ggplot <- function(x, ...) {
   # Store patchwork info in environment for recordedplot to access
@@ -43,7 +43,7 @@ md_render.ggplot <- function(x, ...) {
 
 #' @param x Plot
 #' @param .is_patchwork Is plot a patchwork plot?
-#' @rdname new_md_board
+#' @rdname new_md_extension
 #' @export
 md_render.recordedplot <- function(
   x,
@@ -72,7 +72,7 @@ md_render.recordedplot <- function(
   md_render(new_file(res, dir), value, dir, ...)
 }
 
-#' @rdname new_md_board
+#' @rdname new_md_extension
 #' @export
 md_render.evaluate_evaluation <- function(x, ...) {
   hit <- lgl_ply(x, inherits, "recordedplot")
@@ -84,13 +84,13 @@ md_render.evaluate_evaluation <- function(x, ...) {
 }
 
 #' @method md_render data.frame
-#' @rdname new_md_board
+#' @rdname new_md_extension
 #' @export
 md_render.data.frame <- function(x, ...) {
   md_render(flextable::flextable(utils::head(x)), ...)
 }
 
-#' @rdname new_md_board
+#' @rdname new_md_extension
 #' @export
 md_render.gt_tbl <- function(x, value, dir = tempdir(), ...) {
   res <- tempfile(tmpdir = dir, fileext = ".png")
@@ -112,7 +112,7 @@ md_render.gt_tbl <- function(x, value, dir = tempdir(), ...) {
   md_render(new_file(res, dir), value, dir, ...)
 }
 
-#' @rdname new_md_board
+#' @rdname new_md_extension
 #' @export
 md_render.flextable <- function(x, ...) {
   # Get positioning from attributes or use defaults
