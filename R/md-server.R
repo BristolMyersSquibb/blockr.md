@@ -279,7 +279,7 @@ gen_md_server <- function(template = NULL) {
         )
 
         list(
-          content = res_doc
+          state = list(content = res_doc)
         )
       }
     )
