@@ -61,7 +61,7 @@ gen_md_server <- function(id, board, update, session, parent, ...) {
         # Store block IDs for validation
         available_block_ids(block_ids)
 
-        # Get block titles from the actual board object (subset to match block_ids)
+        # Get block titles from the actual board object
         all_blocks <- board_blocks(board$board)
         block_titles <- vapply(
           all_blocks[block_ids],
