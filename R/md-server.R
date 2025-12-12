@@ -61,15 +61,26 @@ gen_md_server <- function(id, board, update, session, parent, ...) {
         # Store block IDs for validation
         available_block_ids(block_ids)
 
+        # Get block titles from the actual board object
+        all_blocks <- board_blocks(board$board)
+        block_titles <- vapply(
+          all_blocks[block_ids],
+          block_name,
+          character(1)
+        )
+
         # Create completion list with full markdown image syntax
+        # Use block titles as keys (shown as meta labels in autocomplete)
         completions <- paste0("![](blockr://", block_ids, ")")
+        names(completions) <- block_titles
+        completion_list <- as.list(completions)
 
         # Update autocomplete list
         shinyAce::updateAceEditor(
           session,
           "ace",
           autoCompleters = c("static"),
-          autoCompleteList = list(blocks = completions)
+          autoCompleteList = completion_list
         )
 
         # Update again after a delay to ensure it takes effect on first load
@@ -79,7 +90,7 @@ gen_md_server <- function(id, board, update, session, parent, ...) {
               session,
               "ace",
               autoCompleters = c("static"),
-              autoCompleteList = list(blocks = completions)
+              autoCompleteList = completion_list
             )
           },
           delay = 1
@@ -94,10 +105,6 @@ gen_md_server <- function(id, board, update, session, parent, ...) {
           theme = ace_theme()
         )
       )
-
-      res_doc <- reactiveVal()
-
-      observeEvent(input$ace, res_doc(input$ace))
 
       res_tpl <- reactive(
         {
@@ -254,7 +261,7 @@ gen_md_server <- function(id, board, update, session, parent, ...) {
       )
 
       list(
-        state = list(content = res_doc)
+        state = list(content = markdown_debounced)
       )
     }
   )
