@@ -106,10 +106,6 @@ gen_md_server <- function(id, board, update, session, parent, ...) {
         )
       )
 
-      res_doc <- reactiveVal()
-
-      observeEvent(input$ace, res_doc(input$ace))
-
       res_tpl <- reactive(
         {
           inp_temp <- input$template
@@ -265,7 +261,7 @@ gen_md_server <- function(id, board, update, session, parent, ...) {
       )
 
       list(
-        state = list(content = res_doc)
+        state = list(content = markdown_debounced)
       )
     }
   )
