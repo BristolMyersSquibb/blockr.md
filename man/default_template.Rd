@@ -4,15 +4,23 @@
 \alias{default_template}
 \title{Default template option}
 \usage{
-default_template()
+default_template(format = "pptx")
+}
+\arguments{
+\item{format}{One of \code{"pptx"}, \code{"pdf"}, \code{"html"}.}
 }
 \value{
-Named character vector for the default template
+Named character vector.
 }
 \description{
-Default template option
+For \code{pptx} returns the bundled reference-doc. For \code{pdf} and \code{html} returns
+the empty string — pandoc then uses its own built-in template, which always
+matches the installed pandoc version (avoids macro-skew errors like
+undefined \verb{\\pandocbounded} when the bundled template predates the pandoc
+producing the document).
 }
 \examples{
 default_template()
+default_template("pdf")
 
 }

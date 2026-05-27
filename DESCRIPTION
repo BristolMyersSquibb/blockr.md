@@ -28,7 +28,8 @@ Imports:
     flextable,
     later
 Suggests:
-    pdftools
+    pdftools,
+    tinytex
 Remotes:
     BristolMyersSquibb/blockr.core,
     BristolMyersSquibb/blockr.dock

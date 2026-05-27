@@ -10,7 +10,7 @@ gen_md_ui <- function(content = character()) {
           display: none !important;
         }
       ",
-        ns("dl_ppt")
+        ns("dl")
       ))),
       shinyAce::aceEditor(
         ns("ace"),
@@ -30,21 +30,25 @@ gen_md_ui <- function(content = character()) {
       uiOutput(ns("validation_message")),
       div(
         class = "d-flex align-items-center",
-
         selectInput(
-          ns("template_select"),
+          ns("format_select"),
           NULL,
-          choices = get_template_choices(),
-          selected = get_default_template(),
-          width = "100%"
+          choices = available_formats(),
+          selected = "pptx",
+          width = "100px"
+        ),
+        div(
+          style = "margin-left: 8px; flex: 1;",
+          uiOutput(ns("template_select_ui"))
         ),
         downloadButton(
-          ns("dl_ppt"),
+          ns("dl"),
           "Download",
           class = "btn-outline-success btn-sm",
           style = "margin-left: 10px; margin-top: -18px; height: 36px; padding-top: 6.5px;"
         )
       ),
+      uiOutput(ns("pdf_unavailable_note")),
       div(
         class = "mb-3",
         checkboxInput(
@@ -54,12 +58,7 @@ gen_md_ui <- function(content = character()) {
         ),
         conditionalPanel(
           condition = paste0("input['", ns("use_custom_template"), "']"),
-          fileInput(
-            ns("template"),
-            NULL,
-            placeholder = "Select .pptx template file",
-            accept = ".pptx"
-          )
+          uiOutput(ns("custom_template_ui"))
         )
       )
     )
