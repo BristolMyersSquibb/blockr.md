@@ -5,6 +5,9 @@
 
 <!-- badges: start -->
 
+[![lifecycle](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://lifecycle.r-lib.org/articles/stages.html#experimental)
+[![status](https://github.com/BristolMyersSquibb/blockr.md/actions/workflows/ci.yaml/badge.svg)](https://github.com/BristolMyersSquibb/blockr.md/actions/workflows/ci.yaml)
+[![coverage](https://codecov.io/gh/BristolMyersSquibb/blockr.md/graph/badge.svg?token=VOUS7YK0KE)](https://app.codecov.io/gh/BristolMyersSquibb/blockr.md)
 <!-- badges: end -->
 
 The extension package blockr.md provides a markdown document builder to
