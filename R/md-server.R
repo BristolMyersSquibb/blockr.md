@@ -106,8 +106,45 @@ gen_md_server <- function(id, board, update, session, parent, ...) {
         )
       )
 
+      current_format <- reactive({
+        fmt <- input$format_select
+        if (!isTruthy(fmt)) "pptx" else fmt
+      })
+
+      output$template_select_ui <- renderUI({
+        fmt <- current_format()
+        selectInput(
+          session$ns("template_select"),
+          NULL,
+          choices  = get_template_choices(fmt),
+          selected = get_default_template(fmt),
+          width = "100%"
+        )
+      })
+
+      output$custom_template_ui <- renderUI({
+        fmt <- current_format()
+        ext <- paste0(".", format_ext(fmt))
+        fileInput(
+          session$ns("template"),
+          NULL,
+          placeholder = paste0("Select ", ext, " template file"),
+          accept = ext
+        )
+      })
+
+      output$pdf_unavailable_note <- renderUI({
+        if (pdf_available()) return(NULL)
+        div(
+          class = "text-muted",
+          style = "margin-top: -6px; margin-bottom: 8px; font-size: 0.8rem;",
+          tags$small("PDF unavailable on this server (install tinytex).")
+        )
+      })
+
       res_tpl <- reactive(
         {
+          fmt <- current_format()
           inp_temp <- input$template
 
           if (isTruthy(input$use_custom_template) && isTruthy(inp_temp)) {
@@ -115,7 +152,7 @@ gen_md_server <- function(id, board, update, session, parent, ...) {
           } else if (isTruthy(input$template_select)) {
             input$template_select
           } else {
-            pkg_file("templates", "pandoc-default.pptx")
+            default_template(fmt)[[1L]]
           }
         }
       )
@@ -201,29 +238,29 @@ gen_md_server <- function(id, board, update, session, parent, ...) {
         )
       })
 
-      output$dl_ppt <- downloadHandler(
+      output$dl <- downloadHandler(
         filename = function() {
+          fmt <- current_format()
           paste0(
             "topline_",
             format(Sys.time(), "%Y-%m-%d_%H-%M-%S"),
-            ".pptx"
+            ".",
+            format_download_ext(fmt)
           )
         },
         content = function(file) {
           req(input$ace)
+          fmt <- current_format()
 
-          # Create temp files for processing
           ast <- tempfile(fileext = ".json")
           tmp <- tempfile()
           dir.create(tmp)
 
-          # Ensure cleanup
           on.exit({
             unlink(ast)
             unlink(tmp, recursive = TRUE)
           })
 
-          # Process markdown to AST
           filter_md(
             block_filter,
             blocks = lst_xtr(board$blocks, "server", "result"),
@@ -232,30 +269,11 @@ gen_md_server <- function(id, board, update, session, parent, ...) {
             output = ast
           )
 
-          # Determine which template to use: custom upload > function
-          # parameter > selected bundled template
-          pandoc_opts <- NULL
-          template_path <- res_tpl()
-
-          if (!is.null(template_path)) {
-            trg <- file.path(dirname(file), "template.pptx")
-            file.copy(template_path, trg, overwrite = TRUE)
-
-            on.exit(unlink(trg), add = TRUE)
-
-            pandoc_opts <- c(
-              paste0("--reference-doc=", basename(trg)),
-              "--slide-level=2"
-            )
-          }
-
-          # Convert AST to PowerPoint
-          rmarkdown::pandoc_convert(
-            input = ast,
-            from = "json",
-            to = "pptx",
-            output = file,
-            options = pandoc_opts
+          render_format(
+            ast = ast,
+            format = fmt,
+            template = res_tpl(),
+            output = file
           )
         }
       )
