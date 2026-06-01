@@ -42,7 +42,10 @@ gen_md_ui <- function(content = character()) {
           ns("dl_ppt"),
           "Download",
           class = "btn-outline-success btn-sm",
-          style = "margin-left: 10px; margin-top: -18px; height: 36px; padding-top: 6.5px;"
+          style = paste0(
+            "margin-left: 10px; margin-top: -18px; ",
+            "height: 36px; padding-top: 6.5px;"
+          )
         )
       ),
       div(

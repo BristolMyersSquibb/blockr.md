@@ -120,8 +120,7 @@ gen_md_server <- function(id, board, update, session, parent, ...) {
         }
       )
 
-      # Helper function to extract block IDs from markdown
-      extract_block_ids_from_markdown <- function(markdown_text) {
+      extract_block_ids <- function(markdown_text) {
         if (length(markdown_text) == 0 || nchar(markdown_text) == 0) {
           return(character())
         }
@@ -161,7 +160,7 @@ gen_md_server <- function(id, board, update, session, parent, ...) {
         }
 
         # Extract block IDs from markdown
-        used_ids <- extract_block_ids_from_markdown(markdown)
+        used_ids <- extract_block_ids(markdown)
 
         if (length(used_ids) == 0) {
           validation_message("")
@@ -195,7 +194,10 @@ gen_md_server <- function(id, board, update, session, parent, ...) {
         div(
           class = "alert alert-danger",
           role = "alert",
-          style = "margin-top: -5px; margin-bottom: 10px; padding: 8px 12px; font-size: 0.875rem;",
+          style = paste0(
+            "margin-top: -5px; margin-bottom: 10px; ",
+            "padding: 8px 12px; font-size: 0.875rem;"
+          ),
           tags$strong("Error: "),
           gsub("^Warning: ", "", msg)
         )
