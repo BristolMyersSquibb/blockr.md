@@ -1,25 +1,29 @@
-gen_md_server <- function(id, board, update, session, parent, ...) {
-  moduleServer(
-    id,
-    function(input, output, session) {
-      # Reactive value to store available block IDs
-      available_block_ids <- reactiveVal(character())
+gen_md_server <- function(content = character()) {
 
-      # Reactive value for validation message
-      validation_message <- reactiveVal("")
+  function(id, board, update, session, parent, ...) {
+    moduleServer(
+      id,
+      function(input, output, session) {
+        # Reactive value to store available block IDs
+        available_block_ids <- reactiveVal(character())
 
-      # Fix horizontal scrolling on initial load
-      observe(
-        {
-          editor_id <- session$ns("ace")
+        # Reactive value for validation message
+        validation_message <- reactiveVal("")
 
-          # Insert JavaScript to force word wrap and resize editor
-          shiny::insertUI(
-            selector = "body",
-            where = "beforeEnd",
-            immediate = TRUE,
-            ui = tags$script(HTML(sprintf(
-              "
+        content_rv <- reactiveVal(content)
+
+        # Fix horizontal scrolling on initial load
+        observe(
+          {
+            editor_id <- session$ns("ace")
+
+            # Insert JavaScript to force word wrap and resize editor
+            shiny::insertUI(
+              selector = "body",
+              where = "beforeEnd",
+              immediate = TRUE,
+              ui = tags$script(HTML(sprintf(
+                "
             (function() {
               function setupEditor() {
                 if (typeof ace === 'undefined') {
@@ -46,225 +50,229 @@ gen_md_server <- function(id, board, update, session, parent, ...) {
               setupEditor();
             })();
           ",
-              editor_id,
-              editor_id
-            )))
-          )
-        },
-        priority = -100
-      )
-
-      # Update block IDs for autocomplete when blocks change
-      observe({
-        block_ids <- names(board$blocks)
-
-        # Store block IDs for validation
-        available_block_ids(block_ids)
-
-        # Get block titles from the actual board object
-        all_blocks <- board_blocks(board$board)
-        block_titles <- vapply(
-          all_blocks[block_ids],
-          block_name,
-          character(1)
-        )
-
-        # Create completion list with full markdown image syntax
-        # Use block titles as keys (shown as meta labels in autocomplete)
-        completions <- paste0("![](blockr://", block_ids, ")")
-        names(completions) <- block_titles
-        completion_list <- as.list(completions)
-
-        # Update autocomplete list
-        shinyAce::updateAceEditor(
-          session,
-          "ace",
-          autoCompleters = c("static"),
-          autoCompleteList = completion_list
-        )
-
-        # Update again after a delay to ensure it takes effect on first load
-        later::later(
-          function() {
-            shinyAce::updateAceEditor(
-              session,
-              "ace",
-              autoCompleters = c("static"),
-              autoCompleteList = completion_list
+                editor_id,
+                editor_id
+              )))
             )
           },
-          delay = 1
+          priority = -100
         )
-      })
 
-      observeEvent(
-        get_board_option_or_default("dark_mode"),
-        shinyAce::updateAceEditor(
-          session,
-          "ace",
-          theme = ace_theme()
+        # Update block IDs for autocomplete when blocks change
+        observe({
+          block_ids <- names(board$blocks)
+
+          # Store block IDs for validation
+          available_block_ids(block_ids)
+
+          # Get block titles from the actual board object
+          all_blocks <- board_blocks(board$board)
+          block_titles <- vapply(
+            all_blocks[block_ids],
+            block_name,
+            character(1)
+          )
+
+          # Create completion list with full markdown image syntax
+          # Use block titles as keys (shown as meta labels in autocomplete)
+          completions <- paste0("![](blockr://", block_ids, ")")
+          names(completions) <- block_titles
+          completion_list <- as.list(completions)
+
+          # Update autocomplete list
+          shinyAce::updateAceEditor(
+            session,
+            "ace",
+            autoCompleters = c("static"),
+            autoCompleteList = completion_list
+          )
+        })
+
+        observeEvent(
+          get_board_option_or_default("dark_mode"),
+          shinyAce::updateAceEditor(
+            session,
+            "ace",
+            theme = ace_theme()
+          )
         )
-      )
 
-      res_tpl <- reactive(
-        {
-          inp_temp <- input$template
-
-          if (isTruthy(input$use_custom_template) && isTruthy(inp_temp)) {
-            inp_temp$datapath
-          } else if (isTruthy(input$template_select)) {
-            input$template_select
-          } else {
-            pkg_file("templates", "pandoc-default.pptx")
-          }
-        }
-      )
-
-      extract_block_ids <- function(markdown_text) {
-        if (length(markdown_text) == 0 || nchar(markdown_text) == 0) {
-          return(character())
-        }
-
-        # Extract all blockr:// references using regex
-        pattern <- "blockr://([a-zA-Z0-9_]+)"
-        matches <- gregexpr(pattern, markdown_text, perl = TRUE)
-
-        if (matches[[1]][1] == -1) {
-          return(character())
-        }
-
-        # Extract the captured groups (block IDs)
-        all_matches <- regmatches(markdown_text, matches)[[1]]
-        # Remove the "blockr://" prefix
-        block_ids <- gsub("^blockr://", "", all_matches)
-        unique(block_ids)
-      }
-
-      # Debounced reactive for markdown content
-      markdown_debounced <- debounce(
-        reactive(
+        res_tpl <- reactive(
           {
-            input$ace
+            inp_temp <- input$template
+
+            if (isTruthy(input$use_custom_template) && isTruthy(inp_temp)) {
+              inp_temp$datapath
+            } else if (isTruthy(input$template_select)) {
+              input$template_select
+            } else {
+              pkg_file("templates", "pandoc-default.pptx")
+            }
           }
-        ),
-        300
-      )
-
-      # Validate block IDs when markdown changes (debounced)
-      observe({
-        markdown <- markdown_debounced()
-
-        if (length(markdown) == 0 || nchar(markdown) == 0) {
-          validation_message("")
-          return()
-        }
-
-        # Extract block IDs from markdown
-        used_ids <- extract_block_ids(markdown)
-
-        if (length(used_ids) == 0) {
-          validation_message("")
-          return()
-        }
-
-        # Check which IDs are invalid
-        available_ids <- available_block_ids()
-        invalid_ids <- setdiff(used_ids, available_ids)
-
-        if (length(invalid_ids) > 0) {
-          msg <- sprintf(
-            "Warning: Invalid block ID%s: %s",
-            if (length(invalid_ids) > 1) "s" else "",
-            paste(invalid_ids, collapse = ", ")
-          )
-          validation_message(msg)
-        } else {
-          validation_message("")
-        }
-      })
-
-      # Render validation message
-      output$validation_message <- renderUI({
-        msg <- validation_message()
-
-        if (nchar(msg) == 0) {
-          return(NULL)
-        }
-
-        div(
-          class = "alert alert-danger",
-          role = "alert",
-          style = paste0(
-            "margin-top: -5px; margin-bottom: 10px; ",
-            "padding: 8px 12px; font-size: 0.875rem;"
-          ),
-          tags$strong("Error: "),
-          gsub("^Warning: ", "", msg)
         )
-      })
 
-      output$dl_ppt <- downloadHandler(
-        filename = function() {
-          paste0(
-            "topline_",
-            format(Sys.time(), "%Y-%m-%d_%H-%M-%S"),
-            ".pptx"
+        extract_block_ids <- function(markdown_text) {
+          if (length(markdown_text) == 0 || nchar(markdown_text) == 0) {
+            return(character())
+          }
+
+          # Extract all blockr:// references using regex
+          pattern <- "blockr://([a-zA-Z0-9_]+)"
+          matches <- gregexpr(pattern, markdown_text, perl = TRUE)
+
+          if (matches[[1]][1] == -1) {
+            return(character())
+          }
+
+          # Extract the captured groups (block IDs)
+          all_matches <- regmatches(markdown_text, matches)[[1]]
+          # Remove the "blockr://" prefix
+          block_ids <- gsub("^blockr://", "", all_matches)
+          unique(block_ids)
+        }
+
+        # Debounced reactive for markdown content
+        markdown_debounced <- debounce(
+          reactive(
+            {
+              input$ace
+            }
+          ),
+          300
+        )
+
+        observeEvent(
+          markdown_debounced(),
+          if (!identical(content_rv(), markdown_debounced())) {
+            content_rv(markdown_debounced())
+          }
+        )
+
+        observeEvent(
+          content_rv(),
+          if (!identical(content_rv(), input$ace)) {
+            shinyAce::updateAceEditor(session, "ace", value = content_rv())
+          },
+          ignoreInit = TRUE
+        )
+
+        # Validate block IDs when markdown changes (debounced)
+        observe({
+          markdown <- content_rv()
+
+          if (length(markdown) == 0 || nchar(markdown) == 0) {
+            validation_message("")
+            return()
+          }
+
+          # Extract block IDs from markdown
+          used_ids <- extract_block_ids(markdown)
+
+          if (length(used_ids) == 0) {
+            validation_message("")
+            return()
+          }
+
+          # Check which IDs are invalid
+          available_ids <- available_block_ids()
+          invalid_ids <- setdiff(used_ids, available_ids)
+
+          if (length(invalid_ids) > 0) {
+            msg <- sprintf(
+              "Warning: Invalid block ID%s: %s",
+              if (length(invalid_ids) > 1) "s" else "",
+              paste(invalid_ids, collapse = ", ")
+            )
+            validation_message(msg)
+          } else {
+            validation_message("")
+          }
+        })
+
+        # Render validation message
+        output$validation_message <- renderUI({
+          msg <- validation_message()
+
+          if (nchar(msg) == 0) {
+            return(NULL)
+          }
+
+          div(
+            class = "alert alert-danger",
+            role = "alert",
+            style = paste0(
+              "margin-top: -5px; margin-bottom: 10px; ",
+              "padding: 8px 12px; font-size: 0.875rem;"
+            ),
+            tags$strong("Error: "),
+            gsub("^Warning: ", "", msg)
           )
-        },
-        content = function(file) {
-          req(input$ace)
+        })
 
-          # Create temp files for processing
-          ast <- tempfile(fileext = ".json")
-          tmp <- tempfile()
-          dir.create(tmp)
+        output$dl_ppt <- downloadHandler(
+          filename = function() {
+            paste0(
+              "topline_",
+              format(Sys.time(), "%Y-%m-%d_%H-%M-%S"),
+              ".pptx"
+            )
+          },
+          content = function(file) {
+            markdown <- content_rv()
+            req(markdown)
 
-          # Ensure cleanup
-          on.exit({
-            unlink(ast)
-            unlink(tmp, recursive = TRUE)
-          })
+            # Create temp files for processing
+            ast <- tempfile(fileext = ".json")
+            tmp <- tempfile()
+            dir.create(tmp)
 
-          # Process markdown to AST
-          filter_md(
-            block_filter,
-            blocks = lst_xtr(board$blocks, "server", "result"),
-            temp_dir = normalizePath(tmp),
-            doc = input$ace,
-            output = ast
-          )
+            # Ensure cleanup
+            on.exit({
+              unlink(ast)
+              unlink(tmp, recursive = TRUE)
+            })
 
-          # Determine which template to use: custom upload > function
-          # parameter > selected bundled template
-          pandoc_opts <- NULL
-          template_path <- res_tpl()
+            # Process markdown to AST
+            filter_md(
+              block_filter,
+              blocks = lst_xtr(board$blocks, "server", "result"),
+              temp_dir = normalizePath(tmp),
+              doc = markdown,
+              output = ast
+            )
 
-          if (!is.null(template_path)) {
-            trg <- file.path(dirname(file), "template.pptx")
-            file.copy(template_path, trg, overwrite = TRUE)
+            # Determine which template to use: custom upload > function
+            # parameter > selected bundled template
+            pandoc_opts <- NULL
+            template_path <- res_tpl()
 
-            on.exit(unlink(trg), add = TRUE)
+            if (!is.null(template_path)) {
+              trg <- file.path(dirname(file), "template.pptx")
+              file.copy(template_path, trg, overwrite = TRUE)
 
-            pandoc_opts <- c(
-              paste0("--reference-doc=", basename(trg)),
-              "--slide-level=2"
+              on.exit(unlink(trg), add = TRUE)
+
+              pandoc_opts <- c(
+                paste0("--reference-doc=", basename(trg)),
+                "--slide-level=2"
+              )
+            }
+
+            # Convert AST to PowerPoint
+            rmarkdown::pandoc_convert(
+              input = ast,
+              from = "json",
+              to = "pptx",
+              output = file,
+              options = pandoc_opts
             )
           }
+        )
 
-          # Convert AST to PowerPoint
-          rmarkdown::pandoc_convert(
-            input = ast,
-            from = "json",
-            to = "pptx",
-            output = file,
-            options = pandoc_opts
-          )
-        }
-      )
-
-      list(
-        state = list(content = markdown_debounced)
-      )
-    }
-  )
+        list(
+          state = list(content = content_rv)
+        )
+      }
+    )
+  }
 }

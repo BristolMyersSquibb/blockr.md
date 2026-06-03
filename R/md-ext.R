@@ -9,10 +9,11 @@
 new_md_extension <- function(content = character(), ...) {
 
   blockr.dock::new_dock_extension(
-    gen_md_server,
+    gen_md_server(content),
     gen_md_ui(content),
     name = "Document",
     class = "md_extension",
+    external_ctrl = "content",
     ...
   )
 }
