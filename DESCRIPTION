@@ -33,5 +33,5 @@ Suggests:
     testthat (>= 3.0.0)
 Remotes:
     BristolMyersSquibb/blockr.core,
-    BristolMyersSquibb/blockr.dock
+    BristolMyersSquibb/blockr.dock@184-ext-description
 Config/testthat/edition: 3
