@@ -86,19 +86,6 @@ gen_md_server <- function(content = character()) {
             autoCompleters = c("static"),
             autoCompleteList = completion_list
           )
-
-          # Update again after a delay to ensure it takes effect on first load
-          later::later(
-            function() {
-              shinyAce::updateAceEditor(
-                session,
-                "ace",
-                autoCompleters = c("static"),
-                autoCompleteList = completion_list
-              )
-            },
-            delay = 1
-          )
         })
 
         observeEvent(

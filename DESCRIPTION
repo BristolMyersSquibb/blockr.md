@@ -27,8 +27,7 @@ Imports:
     magick,
     evaluate,
     blockr.dock,
-    flextable,
-    later
+    flextable
 Suggests:
     pdftools,
     testthat (>= 3.0.0)
